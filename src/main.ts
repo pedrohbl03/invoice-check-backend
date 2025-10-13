@@ -1,5 +1,7 @@
-import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { NestFactory, Reflector } from '@nestjs/core';
+import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/filters/http-exception.filter';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
@@ -17,7 +19,10 @@ async function bootstrap() {
   app.useGlobalFilters(new AllExceptionsFilter());
 
   // Global interceptors
-  app.useGlobalInterceptors(new LoggingInterceptor());
+  app.useGlobalInterceptors(
+    new LoggingInterceptor(),
+    new ClassSerializerInterceptor(app.get(Reflector)),
+  );
 
   // Global validation pipe
   app.useGlobalPipes(
@@ -32,12 +37,22 @@ async function bootstrap() {
   );
 
   // Global prefix for all routes
-  app.setGlobalPrefix('api');
+  app.setGlobalPrefix('api/v1');
+
+  // Swagger
+  const config = new DocumentBuilder()
+    .setTitle('OCR Invoice Backend')
+    .setDescription('The OCR Invoice Backend API documentation')
+    .setVersion('1.0')
+    .build();
+
+  const documentFactory = () => SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('docs/swagger', app, documentFactory);
 
   const port = process.env.PORT ?? 3000;
   await app.listen(port);
 
-  console.log(`🚀 Application is running on: http://localhost:${port}/api`);
+  console.log(`🚀 Application is running on: http://localhost:${port}/api/v1`);
 }
 
 void bootstrap();
