@@ -27,9 +27,11 @@ export const INSTRUCTIONS = {
 
     Guidelines:
     - If a field cannot be found, use 'null' instead of guessing.
+    - All date fields should be in the format ISO-8601 (YYYY-MM-DD).
     - Always infer the most accurate invoice date and amount possible.
     - Use numbers for all monetary values (no currency symbols, commas, or strings).
     - 'invoiceStatus' should be one of: ['ANALYZED', 'PENDING', 'ERROR'] — infer it from the document context if possible.
     - Return only the JSON, without explanations or Markdown.
+    - If the invoice is not found, return 'null' for all fields.
   `,
 };

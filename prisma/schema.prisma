@@ -30,6 +30,11 @@ enum EnumTokenType {
   REFRESH
 }
 
+enum EnumInteractionType {
+  USER
+  ASSISTANT
+}
+
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
@@ -64,7 +69,7 @@ model Invoice {
   invoiceDate DateTime
   invoiceAmount Decimal
   invoiceStatus EnumInvoiceStatus @default(PENDING)
-  invoiceUrl String
+  invoiceUrl String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -88,7 +93,7 @@ model InvoiceItem {
 model Interaction {
   id        String   @id @default(uuid())
   invoiceId String
-  interactionType String
+  interactionType EnumInteractionType
   interactionData String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

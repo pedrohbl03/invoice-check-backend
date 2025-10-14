@@ -2,21 +2,6 @@ import { Injectable } from '@nestjs/common';
 import OpenAI from 'openai';
 import { InvoiceEntity } from 'src/modules/invoice/domain';
 import { INSTRUCTIONS } from '../../infrastructure/constants/instructions.constants';
-import { zodTextFormat } from "openai/helpers/zod";
-import { z } from 'zod';
-
-
-const InvoiceSchema = z.object({
-  invoiceNumber: z.string(),
-  invoiceDate: z.string(),
-  invoiceAmount: z.number(),
-  invoiceItems: z.array(z.object({
-    itemName: z.string(),
-    itemQuantity: z.number(),
-    itemPrice: z.number(),
-    itemTotal: z.number(),
-  })),
-});
 
 @Injectable()
 export class OpenAIService {
