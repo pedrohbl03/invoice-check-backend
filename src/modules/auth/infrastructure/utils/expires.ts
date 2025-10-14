@@ -1,4 +1,4 @@
-import { EnumTokenType } from "generated/prisma";
+import { EnumTokenType } from 'generated/prisma';
 
 const accessExpiresIn = '1h';
 const refreshExpiresIn = '7d';

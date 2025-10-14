@@ -21,7 +21,10 @@ export class UserService {
 
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
 
-    const newUser = new UserEntity({ ...createUserDto, password: hashedPassword });
+    const newUser = new UserEntity({
+      ...createUserDto,
+      password: hashedPassword,
+    });
 
     return await this.userRepository.createUser(newUser);
   }

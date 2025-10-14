@@ -10,15 +10,17 @@ import { RegisterDto } from '../dto/register.dto';
 import { EnumRole } from 'generated/prisma';
 import { TokensService } from './tokens.service';
 
-
 @Injectable()
 export class AuthService {
-  constructor(private readonly userService: UserService, private readonly tokensService: TokensService) { }
+  constructor(
+    private readonly userService: UserService,
+    private readonly tokensService: TokensService,
+  ) {}
 
-  async login(loginDto: LoginDto): Promise<{ user: UserEntity, tokens: any}> {
+  async login(loginDto: LoginDto): Promise<{ user: UserEntity; tokens: any }> {
     const user = await this.userService.findUserByEmail(loginDto.email);
 
-    if (!user || !await passwordCompare(loginDto.password, user.password)) {
+    if (!user || !(await passwordCompare(loginDto.password, user.password))) {
       throw new InvalidCredentialsError();
     }
 
@@ -30,14 +32,19 @@ export class AuthService {
     };
   }
 
-  async register(newUser: RegisterDto): Promise<{ user: UserEntity, tokens: any }> {
+  async register(
+    newUser: RegisterDto,
+  ): Promise<{ user: UserEntity; tokens: any }> {
     const existingUser = await this.userService.findUserByEmail(newUser.email);
 
     if (existingUser) {
       throw new UserAlreadyExistsError();
     }
 
-    const createdUser = await this.userService.createUser({ ...newUser, role: EnumRole.USER });
+    const createdUser = await this.userService.createUser({
+      ...newUser,
+      role: EnumRole.USER,
+    });
     const tokens = await this.tokensService.generateAuthTokens(createdUser.id);
 
     return {

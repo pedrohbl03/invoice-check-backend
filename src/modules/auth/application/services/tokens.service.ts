@@ -7,11 +7,12 @@ import { TokensRepository } from '../../infrastructure/repositories/tokens.repos
 import { SaveTokenDto } from '../dto/save-token.dto';
 import { JwtService } from '@nestjs/jwt';
 
-
-
 @Injectable()
 export class TokensService {
-  constructor(private readonly tokensRepository: TokensRepository, private readonly jwtService: JwtService) { }
+  constructor(
+    private readonly tokensRepository: TokensRepository,
+    private readonly jwtService: JwtService,
+  ) {}
 
   async deleteTokensByUserId(userId: string): Promise<void> {
     await this.tokensRepository.deleteTokensByUserId(userId);
@@ -22,50 +23,63 @@ export class TokensService {
   }
 
   async saveToken(saveTokenDto: SaveTokenDto): Promise<TokensEntity> {
-    const token = await this.generateToken(saveTokenDto.userId, saveTokenDto.type);
+    const token = await this.generateToken(
+      saveTokenDto.userId,
+      saveTokenDto.type,
+    );
 
     if (!token) {
       throw new Error('Failed to generate token');
     }
 
-    return await this.tokensRepository.saveToken(new TokensEntity({ ...saveTokenDto, token }));
+    return await this.tokensRepository.saveToken(
+      new TokensEntity({ ...saveTokenDto, token }),
+    );
   }
-
 
   async generateToken(userId: string, type: EnumTokenType): Promise<string> {
     const tokenPayload = {
       sub: userId,
       iat: Date.now(),
       type,
-    }
+    };
 
-    return this.jwtService.sign(tokenPayload, { expiresIn: expiresInByType(type) });
+    return this.jwtService.sign(tokenPayload, {
+      expiresIn: expiresInByType(type),
+    });
   }
 
   async generateAuthTokens(userId: string): Promise<{
     accessToken: {
-      token: string,
-      expiresIn: string
-    },
+      token: string;
+      expiresIn: string;
+    };
     refreshToken: {
-      token: string,
-      expiresIn: string
-    }
+      token: string;
+      expiresIn: string;
+    };
   }> {
     const accessToken = await this.generateToken(userId, EnumTokenType.ACCESS);
-    const refreshToken = await this.generateToken(userId, EnumTokenType.REFRESH);
+    const refreshToken = await this.generateToken(
+      userId,
+      EnumTokenType.REFRESH,
+    );
 
-    await this.saveToken({ userId, type: EnumTokenType.REFRESH, token: refreshToken });
+    await this.saveToken({
+      userId,
+      type: EnumTokenType.REFRESH,
+      token: refreshToken,
+    });
 
     return {
       accessToken: {
         token: accessToken,
-        expiresIn: expiresInByType(EnumTokenType.ACCESS)
+        expiresIn: expiresInByType(EnumTokenType.ACCESS),
       },
       refreshToken: {
         token: refreshToken,
-        expiresIn: expiresInByType(EnumTokenType.REFRESH)
-      }
+        expiresIn: expiresInByType(EnumTokenType.REFRESH),
+      },
     };
   }
 

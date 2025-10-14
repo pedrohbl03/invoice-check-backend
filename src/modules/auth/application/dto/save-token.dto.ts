@@ -1,5 +1,5 @@
-import { IsNotEmpty, IsString } from "class-validator";
-import { EnumTokenType } from "generated/prisma";
+import { IsNotEmpty, IsString } from 'class-validator';
+import { EnumTokenType } from 'generated/prisma';
 
 export class SaveTokenDto {
   @IsString()

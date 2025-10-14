@@ -10,12 +10,18 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('login')
-  async login(@Body() loginDto: LoginDto): Promise<{ user: UserEntity, tokens: { accessToken: string, refreshToken: string } }> {
+  async login(@Body() loginDto: LoginDto): Promise<{
+    user: UserEntity;
+    tokens: { accessToken: string; refreshToken: string };
+  }> {
     return this.authService.login(loginDto);
   }
 
   @Post('register')
-  async register(@Body() registerDto: RegisterDto): Promise<{ user: UserEntity, tokens: { accessToken: string, refreshToken: string } }> {
+  async register(@Body() registerDto: RegisterDto): Promise<{
+    user: UserEntity;
+    tokens: { accessToken: string; refreshToken: string };
+  }> {
     return this.authService.register(registerDto);
   }
 
@@ -24,4 +30,4 @@ export class AuthController {
   async logout(@Req() request: Request): Promise<void> {
     return this.authService.logout(request['userId']);
   }
-} 
+}

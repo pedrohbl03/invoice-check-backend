@@ -6,8 +6,7 @@ import { InteractionEntity } from './invoice-interaction.entity';
 
 export class InvoiceEntity implements Invoice {
   constructor(partial: Partial<InvoiceEntity>) {
-
-    if(partial.invoiceDate) {
+    if (partial.invoiceDate) {
       partial.invoiceDate = new Date(partial.invoiceDate);
     }
 
@@ -21,7 +20,7 @@ export class InvoiceEntity implements Invoice {
   invoiceNumber: string | null;
 
   @Transform(({ value }) => {
-    if(value) {
+    if (value) {
       return new Date(value);
     }
     return null;

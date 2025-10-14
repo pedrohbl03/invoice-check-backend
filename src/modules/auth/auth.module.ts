@@ -13,10 +13,10 @@ import { envConfig } from 'src/config';
     JwtModule.register({
       secret: envConfig().jwt.secret,
       global: true,
-    })
+    }),
   ],
   controllers: [AuthController],
   providers: [AuthService, TokensService, TokensRepository],
   exports: [AuthService],
 })
-export class AuthModule { }
+export class AuthModule {}

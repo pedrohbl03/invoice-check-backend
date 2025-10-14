@@ -7,7 +7,6 @@ import { EnumTokenType } from 'generated/prisma';
 export class TokensRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-
   async deleteTokensByUserId(userId: string): Promise<void> {
     await this.prisma.userTokens.deleteMany({
       where: { userId },
@@ -22,7 +21,10 @@ export class TokensRepository {
     return createdAuthToken;
   }
 
-  async findTokenByType(userId: string, type: EnumTokenType): Promise<TokensEntity | null> {
+  async findTokenByType(
+    userId: string,
+    type: EnumTokenType,
+  ): Promise<TokensEntity | null> {
     const token = await this.prisma.userTokens.findFirst({
       where: { userId, type },
     });

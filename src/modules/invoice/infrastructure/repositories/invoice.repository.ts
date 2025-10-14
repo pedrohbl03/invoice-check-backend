@@ -4,7 +4,7 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class InvoiceRepository {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
   async createInvoice(invoice: InvoiceEntity): Promise<InvoiceEntity> {
     const createdInvoice = await this.prisma.invoice.create({

@@ -4,9 +4,15 @@ import { InvoiceRepository } from '../../infrastructure/repositories/invoice.rep
 import { InvoiceEntity } from '../../domain';
 import { envConfig } from 'src/config';
 import { EnumInvoiceStatus } from 'generated/prisma';
-import { formatCDNUrl, generateInvoiceKey } from '../../infrastructure/utils/formatCDNurl';
+import {
+  formatCDNUrl,
+  generateInvoiceKey,
+} from '../../infrastructure/utils/formatCDNurl';
 import { OpenAIService } from 'src/modules/openai';
-import { InvoiceNotFoundError, InvoiceValidationError } from '../../invoice.error';
+import {
+  InvoiceNotFoundError,
+  InvoiceValidationError,
+} from '../../invoice.error';
 
 @Injectable()
 export class InvoiceService {
@@ -14,49 +20,72 @@ export class InvoiceService {
     private readonly invoiceRepository: InvoiceRepository,
     private readonly openaiService: OpenAIService,
     private readonly storageService: StorageService,
-  ) { }
+  ) {}
 
   async createInvoice(
     file: Express.Multer.File,
-    userId: string
+    userId: string,
   ): Promise<InvoiceEntity> {
+    const invoice = await this.invoiceRepository.createInvoice(
+      new InvoiceEntity({
+        userId,
+        invoiceStatus: EnumInvoiceStatus.PENDING,
+        fileOriginalName: file.originalname,
+      }),
+    );
 
-    const invoice = await this.invoiceRepository.createInvoice(new InvoiceEntity({
+    const invoiceKey = generateInvoiceKey(
       userId,
-      invoiceStatus: EnumInvoiceStatus.PENDING,
-      fileOriginalName: file.originalname,
-    }));
+      invoice.id,
+      file.mimetype.split('/')[1],
+    );
+    await this.storageService.uploadFile(
+      envConfig().r2.bucketName,
+      invoiceKey,
+      file,
+    );
 
-    const invoiceKey = generateInvoiceKey(userId, invoice.id, file.mimetype.split('/')[1]);
-    await this.storageService.uploadFile(envConfig().r2.bucketName, invoiceKey, file)
-
-    const invoiceUpdated = await this.invoiceRepository.updateInvoice(invoice.id, new InvoiceEntity({
-      invoiceUrl: formatCDNUrl(invoiceKey),
-    }));
+    const invoiceUpdated = await this.invoiceRepository.updateInvoice(
+      invoice.id,
+      new InvoiceEntity({
+        invoiceUrl: formatCDNUrl(invoiceKey),
+      }),
+    );
 
     this.processInvoiceAsync(invoice, file).catch(async (error) => {
-      await this.invoiceRepository.updateInvoice(invoice.id, new InvoiceEntity({
-        invoiceStatus: EnumInvoiceStatus.ERROR, 
-      }));
-      
+      await this.invoiceRepository.updateInvoice(
+        invoice.id,
+        new InvoiceEntity({
+          invoiceStatus: EnumInvoiceStatus.ERROR,
+        }),
+      );
+
       console.error(invoice.id, error);
     });
 
     return new InvoiceEntity(invoiceUpdated);
   }
 
-  private async processInvoiceAsync(invoice: InvoiceEntity, file: Express.Multer.File): Promise<InvoiceEntity> {
-    const analyzedInvoice = await this.openaiService.analyzeInvoiceByBuffer(file);
+  private async processInvoiceAsync(
+    invoice: InvoiceEntity,
+    file: Express.Multer.File,
+  ): Promise<InvoiceEntity> {
+    const analyzedInvoice =
+      await this.openaiService.analyzeInvoiceByBuffer(file);
 
     if (!analyzedInvoice) {
       throw new InvoiceValidationError('Failed to analyze invoice');
     }
 
-    const updatedInvoice = await this.invoiceRepository.updateInvoiceWithNewItemsAndInteractions(invoice.id, new InvoiceEntity({
-      ...analyzedInvoice,
-      invoiceStatus: EnumInvoiceStatus.ANALYZED,
-    }));
-    
+    const updatedInvoice =
+      await this.invoiceRepository.updateInvoiceWithNewItemsAndInteractions(
+        invoice.id,
+        new InvoiceEntity({
+          ...analyzedInvoice,
+          invoiceStatus: EnumInvoiceStatus.ANALYZED,
+        }),
+      );
+
     if (!updatedInvoice) {
       throw new Error('Failed to update invoice');
     }
@@ -83,8 +112,7 @@ export class InvoiceService {
       throw new InvoiceNotFoundError();
     }
 
-
-   /*  const history = await this.invoiceRepository.findHistoryByInvoiceId(id);
+    /*  const history = await this.invoiceRepository.findHistoryByInvoiceId(id);
 
     if (!history) {
       throw new InvoiceNotFoundError();
