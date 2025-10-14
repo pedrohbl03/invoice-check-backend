@@ -22,6 +22,12 @@ enum EnumRole {
 enum EnumInvoiceStatus {
   ANALYZED
   ERROR
+  PENDING
+}
+
+enum EnumTokenType {
+  ACCESS
+  REFRESH
 }
 
 model User {
@@ -35,14 +41,14 @@ model User {
   updatedAt DateTime @updatedAt
 
   invoices Invoice[]
-  AuthTokens AuthTokens[]
+  userTokens UserTokens[]
 }
 
-model AuthTokens {
+model UserTokens {
   id        String   @id @default(uuid())
   userId    String
-  authToken     String
-  refreshToken     String
+  token     String
+  type EnumTokenType @default(ACCESS)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -53,9 +59,11 @@ model Invoice {
   id        String   @id @default(uuid())
   userId    String
   invoiceNumber String
+  shipperName String
+  consigneeName String
   invoiceDate DateTime
   invoiceAmount Decimal
-  invoiceStatus String
+  invoiceStatus EnumInvoiceStatus @default(PENDING)
   invoiceUrl String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

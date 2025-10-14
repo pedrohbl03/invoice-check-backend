@@ -31,15 +31,17 @@ export class InvoiceService {
    
   }
 
-  findAllInvoices(): Promise<InvoiceEntity[]> {
-    return this.invoiceRepository.findAllInvoices();
+
+
+  async findAllInvoices(): Promise<InvoiceEntity[]> {
+    return await this.invoiceRepository.findAllInvoices();
   }
 
-  findInvoiceById(id: string): Promise<InvoiceEntity | null> {
-    return this.invoiceRepository.findInvoiceById(id);
+  async findInvoiceById(id: string): Promise<InvoiceEntity | null> {
+    return await this.invoiceRepository.findInvoiceById(id);
   }
 
-  deleteInvoice(id: string): Promise<void> {
-    return this.invoiceRepository.deleteInvoice(id);
+  async deleteInvoice(id: string): Promise<void> {
+    await this.invoiceRepository.deleteInvoice(id);
   }
 }

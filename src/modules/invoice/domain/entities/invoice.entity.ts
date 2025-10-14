@@ -1,14 +1,16 @@
-import { Invoice } from 'generated/prisma';
+import { EnumInvoiceStatus, Invoice } from 'generated/prisma';
 import { Decimal } from 'generated/prisma/runtime/library';
 
 export class InvoiceEntity implements Invoice {
   id: string;
   userId: string;
   amount: number;
+  shipperName: string;
+  consigneeName: string;
   invoiceNumber: string;
   invoiceDate: Date;
   invoiceAmount: Decimal;
-  invoiceStatus: string;
+  invoiceStatus: EnumInvoiceStatus;
   invoiceUrl: string;
 
   createdAt: Date;

@@ -4,6 +4,7 @@ import { UserEntity } from '../../domain';
 import { UserRepository } from '../../infrastructure/repositories/user.repository';
 import { UserAlreadyExistsError, UserNotFoundError } from '../../user.error';
 import { UpdateUserDto } from '../dto/update-user.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
@@ -18,7 +19,9 @@ export class UserService {
       throw new UserAlreadyExistsError();
     }
 
-    const newUser = new UserEntity({ ...createUserDto });
+    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+
+    const newUser = new UserEntity({ ...createUserDto, password: hashedPassword });
 
     return await this.userRepository.createUser(newUser);
   }

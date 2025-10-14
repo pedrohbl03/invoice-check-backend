@@ -15,7 +15,6 @@ export const envConfig = () => ({
   },
   jwt: {
     secret: process.env.JWT_SECRET || 'your-secret-key',
-    expiresIn: process.env.JWT_EXPIRES_IN || '7d',
   },
   openai: {
     apiKey: process.env.OPENAI_API_KEY || 'your_openai_api_key',
