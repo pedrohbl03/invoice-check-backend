@@ -1,0 +1,20 @@
+import { Invoice } from 'generated/prisma';
+import { Decimal } from 'generated/prisma/runtime/library';
+
+export class InvoiceEntity implements Invoice {
+  id: string;
+  userId: string;
+  amount: number;
+  invoiceNumber: string;
+  invoiceDate: Date;
+  invoiceAmount: Decimal;
+  invoiceStatus: string;
+  invoiceUrl: string;
+
+  createdAt: Date;
+  updatedAt: Date;
+
+  constructor(partial: Partial<Invoice>) {
+    Object.assign(this, partial);
+  }
+}
