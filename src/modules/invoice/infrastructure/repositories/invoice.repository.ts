@@ -4,18 +4,76 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class InvoiceRepository {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   async createInvoice(invoice: InvoiceEntity): Promise<InvoiceEntity> {
     const createdInvoice = await this.prisma.invoice.create({
-      data: invoice,
+      data: {
+        ...invoice,
+        ...(invoice.invoiceItems && {
+          invoiceItems: {
+            createMany: { data: invoice.invoiceItems },
+          },
+        }),
+        ...(invoice.interactions && {
+          interactions: {
+            createMany: { data: invoice.interactions },
+          },
+        }),
+      },
+      include: {
+        invoiceItems: true,
+        interactions: true,
+      },
     });
 
     if (!createdInvoice) {
       throw new Error('Failed to create invoice');
     }
 
-    return new InvoiceEntity(createdInvoice);
+    return new InvoiceEntity(createdInvoice as InvoiceEntity);
+  }
+
+  async updateInvoice(
+    id: string,
+    invoice: Partial<InvoiceEntity>,
+  ): Promise<InvoiceEntity> {
+    const { invoiceItems, interactions, ...invoiceData } = invoice;
+    const updatedInvoice = await this.prisma.invoice.update({
+      where: { id },
+      data: invoiceData,
+    });
+
+    return new InvoiceEntity(updatedInvoice);
+  }
+
+  async updateInvoiceWithNewItemsAndInteractions(
+    id: string,
+    invoice: Partial<InvoiceEntity>,
+  ): Promise<InvoiceEntity> {
+    const { invoiceItems, interactions, ...invoiceData } = invoice;
+    const updatedInvoice = await this.prisma.invoice.update({
+      where: { id },
+      data: {
+        ...invoiceData,
+        ...(invoiceItems && {
+          invoiceItems: {
+            createMany: { data: invoiceItems },
+          },
+        }),
+        ...(interactions && {
+          interactions: {
+            createMany: { data: interactions },
+          },
+        }),
+      },
+      include: {
+        invoiceItems: true,
+        interactions: true,
+      },
+    });
+
+    return new InvoiceEntity(updatedInvoice as InvoiceEntity);
   }
 
   async findInvoiceById(id: string): Promise<InvoiceEntity | null> {
@@ -48,21 +106,5 @@ export class InvoiceRepository {
     });
 
     return invoices.map((invoice) => new InvoiceEntity(invoice));
-  }
-
-  async updateInvoice(
-    id: string,
-    invoice: InvoiceEntity,
-  ): Promise<InvoiceEntity | null> {
-    const updatedInvoice = await this.prisma.invoice.update({
-      where: { id },
-      data: invoice,
-    });
-
-    if (!updatedInvoice) {
-      return null;
-    }
-
-    return new InvoiceEntity(updatedInvoice);
   }
 }

@@ -63,13 +63,17 @@ model UserTokens {
 model Invoice {
   id        String   @id @default(uuid())
   userId    String
-  invoiceNumber String
-  shipperName String
-  consigneeName String
-  invoiceDate DateTime
-  invoiceAmount Decimal
+  invoiceNumber String?
+  shipperName String?
+  consigneeName String?
+  invoiceDate DateTime?
+  invoiceAmount Decimal?
+  invoiceDiscount Decimal?
+  invoiceTax Decimal?
   invoiceStatus EnumInvoiceStatus @default(PENDING)
+  
   invoiceUrl String?
+  fileOriginalName String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -80,14 +84,14 @@ model Invoice {
 }
 
 model InvoiceItem {
-  id        String   @id @default(uuid())
+  id        Int   @id @default(autoincrement())
   invoiceId String
   itemName String
   itemQuantity Int
   itemPrice Decimal
   itemTotal Decimal
 
-  invoice Invoice @relation(fields: [invoiceId], references: [id])
+  invoice Invoice @relation(fields: [invoiceId], references: [id])  
 }
 
 model Interaction {

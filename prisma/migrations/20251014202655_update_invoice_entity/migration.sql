@@ -1,0 +1,6 @@
+-- AlterTable
+ALTER TABLE "Invoice" ALTER COLUMN "invoiceNumber" DROP NOT NULL,
+ALTER COLUMN "invoiceDate" DROP NOT NULL,
+ALTER COLUMN "invoiceAmount" DROP NOT NULL,
+ALTER COLUMN "consigneeName" DROP NOT NULL,
+ALTER COLUMN "shipperName" DROP NOT NULL;

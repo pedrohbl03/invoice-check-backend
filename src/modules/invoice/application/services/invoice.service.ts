@@ -20,30 +20,43 @@ export class InvoiceService {
     file: Express.Multer.File,
     userId: string
   ): Promise<InvoiceEntity> {
+
+    const invoice = await this.invoiceRepository.createInvoice(new InvoiceEntity({
+      userId,
+      invoiceStatus: EnumInvoiceStatus.PENDING,
+      fileOriginalName: file.originalname,
+    }));
+
+    const invoiceKey = generateInvoiceKey(userId, invoice.id, file.mimetype.split('/')[1]);
+    await this.storageService.uploadFile(envConfig().r2.bucketName, invoiceKey, file)
+
+    const invoiceUpdated = await this.invoiceRepository.updateInvoice(invoice.id, new InvoiceEntity({
+      invoiceUrl: formatCDNUrl(invoiceKey),
+    }));
+
+    this.processInvoiceAsync(invoice, file).catch(async (error) => {
+      await this.invoiceRepository.updateInvoice(invoice.id, new InvoiceEntity({
+        invoiceStatus: EnumInvoiceStatus.ERROR, 
+      }));
+      
+      console.error(invoice.id, error);
+    });
+
+    return new InvoiceEntity(invoiceUpdated);
+  }
+
+  private async processInvoiceAsync(invoice: InvoiceEntity, file: Express.Multer.File): Promise<InvoiceEntity> {
     const analyzedInvoice = await this.openaiService.analyzeInvoiceByBuffer(file);
 
     if (!analyzedInvoice) {
-      throw new Error('Failed to analyze invoice');
+      throw new InvoiceValidationError('Failed to analyze invoice');
     }
 
-    const invoice = await this.invoiceRepository.createInvoice({
+    const updatedInvoice = await this.invoiceRepository.updateInvoiceWithNewItemsAndInteractions(invoice.id, new InvoiceEntity({
       ...analyzedInvoice,
-      userId,
       invoiceStatus: EnumInvoiceStatus.ANALYZED,
-    });
-
-    const invoiceKey = generateInvoiceKey(userId, invoice.id, file.mimetype.split('/')[1]);
-
-    await this.storageService.uploadFile(envConfig().r2.bucketName, invoiceKey, file)
-      .catch(async (error) => {
-        await this.invoiceRepository.deleteInvoice(invoice.id);
-        throw new Error('Failed to upload invoice');
-      });
-
-    invoice.invoiceUrl = formatCDNUrl(invoiceKey);
-
-    const updatedInvoice = await this.invoiceRepository.updateInvoice(invoice.id, invoice);
-
+    }));
+    
     if (!updatedInvoice) {
       throw new Error('Failed to update invoice');
     }

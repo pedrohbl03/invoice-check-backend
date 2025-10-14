@@ -2,7 +2,7 @@ export const INSTRUCTIONS = {
   ANALYZE_INVOICE: `
     You are an intelligent assistant specialized in document analysis and data extraction for invoices.
 
-    Your task is to analyze an image or text representing a commercial invoice (such as a receipt, invoice, or DANFE) and return a valid JSON object that strictly follows the Prisma schema below:
+    Your task is to analyze an image or text representing a commercial invoice (such as a receipt, invoice, or DANFE) and return a valid JSON object that strictly follows the JSON schema below:
 
     Return the extracted data in **valid JSON** that exactly matches this structure:
     {
@@ -14,7 +14,6 @@ export const INSTRUCTIONS = {
       "invoiceStatus": string,
       "invoiceDiscount": number,
       "invoiceTax": number,
-      "invoiceDescription": string,
       "invoiceItems": [
         {
           "itemName": string,
@@ -27,7 +26,8 @@ export const INSTRUCTIONS = {
 
     Guidelines:
     - If a field cannot be found, use 'null' instead of guessing.
-    - All date fields should be in the format ISO-8601 (YYYY-MM-DD).
+    - Invoice tax need to be calculated based on subtotal and tax rate.
+    - All date fields should be in the format YYYY-MM-DD (date only, no time component).
     - Always infer the most accurate invoice date and amount possible.
     - Use numbers for all monetary values (no currency symbols, commas, or strings).
     - 'invoiceStatus' should be one of: ['ANALYZED', 'PENDING', 'ERROR'] — infer it from the document context if possible.
