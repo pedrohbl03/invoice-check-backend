@@ -1,0 +1,560 @@
+{
+	"info": {
+		"_postman_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+		"name": "OCR Invoice Backend API",
+		"description": "Collection para testar todos os endpoints do sistema OCR Invoice Backend desenvolvido em NestJS",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "12345678"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Register User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const jsonData = pm.response.json();",
+									"    pm.globals.set(\"accessToken\", jsonData.tokens.accessToken);",
+									"    pm.globals.set(\"refreshToken\", jsonData.tokens.refreshToken);",
+									"    pm.globals.set(\"userId\", jsonData.user.id);",
+									"    console.log(\"Tokens salvos automaticamente\");",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"João Silva\",\n  \"email\": \"joao.silva@email.com\",\n  \"password\": \"senha123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						},
+						"description": "Registra um novo usuário no sistema"
+					},
+					"response": []
+				},
+				{
+					"name": "Login User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const jsonData = pm.response.json();",
+									"    pm.globals.set(\"accessToken\", jsonData.tokens.accessToken);",
+									"    pm.globals.set(\"refreshToken\", jsonData.tokens.refreshToken);",
+									"    pm.globals.set(\"userId\", jsonData.user.id);",
+									"    console.log(\"Login realizado com sucesso - Tokens salvos\");",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"joao.silva@email.com\",\n  \"password\": \"senha123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						},
+						"description": "Autentica um usuário e retorna tokens JWT"
+					},
+					"response": []
+				},
+				{
+					"name": "Logout User",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auth/logout",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"logout"
+							]
+						},
+						"description": "Faz logout do usuário autenticado"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints para autenticação de usuários"
+		},
+		{
+			"name": "Users Management",
+			"item": [
+				{
+					"name": "Create User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Maria Santos\",\n  \"email\": \"maria.santos@email.com\",\n  \"password\": \"senha456\",\n  \"role\": \"USER\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/users",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users"
+							]
+						},
+						"description": "Cria um novo usuário no sistema"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Users",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users"
+							]
+						},
+						"description": "Lista todos os usuários do sistema"
+					},
+					"response": []
+				},
+				{
+					"name": "Get User by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/{{userId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"{{userId}}"
+							]
+						},
+						"description": "Busca um usuário específico por ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Update User",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"João Silva Atualizado\",\n  \"email\": \"joao.silva.novo@email.com\",\n  \"password\": \"novaSenha123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/users/{{userId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"{{userId}}"
+							]
+						},
+						"description": "Atualiza os dados de um usuário específico"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete User",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/{{userId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"{{userId}}"
+							]
+						},
+						"description": "Remove um usuário do sistema"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints para gerenciamento de usuários"
+		},
+		{
+			"name": "Invoice Management",
+			"item": [
+				{
+					"name": "Upload Invoice",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const jsonData = pm.response.json();",
+									"    pm.globals.set(\"invoiceId\", jsonData.id);",
+									"    console.log(\"Invoice ID salvo: \" + jsonData.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": [],
+									"description": "Arquivo da fatura (PDF, JPG, PNG)"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/invoices",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"invoices"
+							]
+						},
+						"description": "Faz upload de uma fatura para processamento OCR"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Invoices",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/invoices",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"invoices"
+							]
+						},
+						"description": "Lista todas as faturas do sistema"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Invoice by ID",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/invoices/{{invoiceId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"invoices",
+								"{{invoiceId}}"
+							]
+						},
+						"description": "Busca uma fatura específica por ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Invoice",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/invoices/{{invoiceId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"invoices",
+								"{{invoiceId}}"
+							]
+						},
+						"description": "Remove uma fatura do sistema"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Chat History",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/invoices/{{invoiceId}}/chat",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"invoices",
+								"{{invoiceId}}",
+								"chat"
+							]
+						},
+						"description": "Obtém o histórico de chat de uma fatura específica"
+					},
+					"response": []
+				},
+				{
+					"name": "Send Chat Message",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"message\": \"Pode me explicar os detalhes desta fatura?\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/invoices/{{invoiceId}}/chat",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"invoices",
+								"{{invoiceId}}",
+								"chat"
+							]
+						},
+						"description": "Envia uma mensagem no chat de uma fatura específica"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints para gerenciamento de faturas e funcionalidades de chat"
+		},
+		{
+			"name": "Health Check",
+			"item": [
+				{
+					"name": "API Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								""
+							]
+						},
+						"description": "Verifica se a API está funcionando"
+					},
+					"response": []
+				},
+				{
+					"name": "Swagger Documentation",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/docs/swagger",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"docs",
+								"swagger"
+							]
+						},
+						"description": "Acessa a documentação Swagger da API"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints para verificação de saúde da API"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Script executado antes de cada requisição",
+					"console.log('Executando requisição para: ' + pm.request.url);"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Script executado após cada requisição",
+					"console.log('Status da resposta: ' + pm.response.code);"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3000/api/v1",
+			"type": "string"
+		},
+		{
+			"key": "accessToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "refreshToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "userId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "invoiceId",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

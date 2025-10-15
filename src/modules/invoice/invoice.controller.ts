@@ -8,11 +8,13 @@ import {
   Param,
   UseGuards,
   Req,
+  Body,
 } from '@nestjs/common';
 import { InvoiceService } from './application/services';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { InvoiceEntity } from './domain/entities/invoice.entity';
 import { AuthGuard } from '../auth/auth.guard';
+import { ChatEntity } from './domain/entities/invoice-chat.entity';
 
 @Controller('invoices')
 export class InvoiceController {
@@ -47,8 +49,17 @@ export class InvoiceController {
   }
 
   @UseGuards(AuthGuard)
+  @Get(':id/chat')
+  getChatHistory(@Param('id') id: string): Promise<ChatEntity | null> {
+    return this.invoiceService.getChatHistoryByInvoiceId(id);
+  }
+
+  @UseGuards(AuthGuard)
   @Post(':id/chat')
-  chat(@Param('id') id: string): Promise<void> {
-    return this.invoiceService.chat(id);
+  postChatMessage(
+    @Param('id') id: string,
+    @Body('message') message: string,
+  ): Promise<void> {
+    return this.invoiceService.postChatMessage(id, message);
   }
 }

@@ -8,11 +8,14 @@ import {
   formatCDNUrl,
   generateInvoiceKey,
 } from '../../infrastructure/utils/formatCDNurl';
-import { OpenAIService } from 'src/modules/openai';
+import { InteractionNotFoundError, OpenAIService } from 'src/modules/openai';
 import {
   InvoiceNotFoundError,
+  InvoiceProcessingError,
   InvoiceValidationError,
 } from '../../invoice.error';
+import { StorageUploadError } from 'src/database/storage/storage.error';
+import { ChatEntity } from '../../domain/entities/invoice-chat.entity';
 
 @Injectable()
 export class InvoiceService {
@@ -39,11 +42,14 @@ export class InvoiceService {
       invoice.id,
       file.mimetype.split('/')[1],
     );
-    await this.storageService.uploadFile(
-      envConfig().r2.bucketName,
-      invoiceKey,
-      file,
-    );
+
+    await this.storageService
+      .uploadFile(envConfig().r2.bucketName, invoiceKey, file)
+      .catch(async (error) => {
+        await this.invoiceRepository.deleteInvoice(invoice.id);
+        console.error(invoice.id, error);
+        throw new StorageUploadError();
+      });
 
     const invoiceUpdated = await this.invoiceRepository.updateInvoice(
       invoice.id,
@@ -59,38 +65,11 @@ export class InvoiceService {
           invoiceStatus: EnumInvoiceStatus.ERROR,
         }),
       );
-
       console.error(invoice.id, error);
+      throw new InvoiceProcessingError();
     });
 
     return new InvoiceEntity(invoiceUpdated);
-  }
-
-  private async processInvoiceAsync(
-    invoice: InvoiceEntity,
-    file: Express.Multer.File,
-  ): Promise<InvoiceEntity> {
-    const analyzedInvoice =
-      await this.openaiService.analyzeInvoiceByBuffer(file);
-
-    if (!analyzedInvoice) {
-      throw new InvoiceValidationError('Failed to analyze invoice');
-    }
-
-    const updatedInvoice =
-      await this.invoiceRepository.updateInvoiceWithNewItemsAndInteractions(
-        invoice.id,
-        new InvoiceEntity({
-          ...analyzedInvoice,
-          invoiceStatus: EnumInvoiceStatus.ANALYZED,
-        }),
-      );
-
-    if (!updatedInvoice) {
-      throw new Error('Failed to update invoice');
-    }
-
-    return new InvoiceEntity(updatedInvoice);
   }
 
   async findAllInvoices(): Promise<InvoiceEntity[]> {
@@ -105,19 +84,87 @@ export class InvoiceService {
     await this.invoiceRepository.deleteInvoice(id);
   }
 
-  async chat(id: string): Promise<void> {
+  async getChatHistoryByInvoiceId(id: string): Promise<ChatEntity | null> {
     const invoice = await this.invoiceRepository.findInvoiceById(id);
 
     if (!invoice) {
       throw new InvoiceNotFoundError();
     }
 
-    /*  const history = await this.invoiceRepository.findHistoryByInvoiceId(id);
+    const chatHistory =
+      await this.invoiceRepository.getChatHistoryByInvoiceId(id);
 
-    if (!history) {
+    if (!chatHistory) {
+      throw new InteractionNotFoundError();
+    }
+
+    return chatHistory;
+  }
+
+  async postChatMessage(id: string, message: string): Promise<any> {
+    const invoice = await this.invoiceRepository.findInvoiceById(id);
+
+    if (!invoice) {
       throw new InvoiceNotFoundError();
     }
- */
-    throw new Error('Chat with invoice not implemented');
+
+    if (invoice.invoiceStatus !== EnumInvoiceStatus.ANALYZED) {
+      throw new InvoiceValidationError(
+        'Invoice must be analyzed before chatting',
+      );
+    }
+
+    let history = await this.invoiceRepository.getChatHistoryByInvoiceId(id);
+
+    if (!history) {
+      history = await this.invoiceRepository.createChatHistory(id);
+    }
+
+    await this.invoiceRepository.createChatInteraction(
+      history.id,
+      'USER',
+      message,
+    );
+
+    const response = await this.openaiService.sendMessage(
+      invoice,
+      history,
+      message,
+    );
+
+    await this.invoiceRepository.createChatInteraction(
+      history.id,
+      'ASSISTANT',
+      response,
+    );
+
+    return response;
+  }
+
+  private async processInvoiceAsync(
+    invoice: InvoiceEntity,
+    file: Express.Multer.File,
+  ): Promise<InvoiceEntity> {
+    const analyzedInvoice =
+      await this.openaiService.analyzeInvoiceByBuffer(file);
+
+    if (!analyzedInvoice) {
+      throw new InvoiceValidationError('Failed to analyze invoice');
+    }
+
+    const updatedInvoice =
+      await this.invoiceRepository.updateInvoiceRelationships(
+        invoice.id,
+        new InvoiceEntity({
+          ...analyzedInvoice,
+          invoiceStatus: EnumInvoiceStatus.ANALYZED,
+        }),
+      );
+
+    if (!updatedInvoice) {
+      throw new Error('Failed to update invoice');
+    }
+
+    return new InvoiceEntity(updatedInvoice);
   }
 }

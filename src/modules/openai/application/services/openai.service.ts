@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import OpenAI from 'openai';
 import { InvoiceEntity } from 'src/modules/invoice/domain';
 import { INSTRUCTIONS } from '../../infrastructure/constants/instructions.constants';
+import { ChatInteractionEntity } from 'src/modules/invoice/domain/entities/chat-interaction.entity';
+import { ChatEntity } from 'src/modules/invoice/domain/entities/invoice-chat.entity';
 
 @Injectable()
 export class OpenAIService {
@@ -37,7 +39,7 @@ export class OpenAIService {
 
   async sendMessage(
     invoice: InvoiceEntity,
-    history: any[],
+    history: ChatEntity,
     newMessage: string,
   ): Promise<string> {
     const response = await this.client.chat.completions.create({
@@ -48,11 +50,18 @@ export class OpenAIService {
           content: [
             {
               type: 'text',
-              text: 'Analyze the invoice and provide a summary of the invoice.',
+              text: INSTRUCTIONS.INVOICE_CONTEXT(invoice),
             },
           ],
         },
-        ...history,
+
+        ...(history?.chatInteractions?.map(
+          (interaction: ChatInteractionEntity) => ({
+            role: interaction.role.toLowerCase() as 'user' | 'assistant',
+            content: interaction.content,
+          }),
+        ) || []),
+
         { role: 'user', content: newMessage },
       ],
     });

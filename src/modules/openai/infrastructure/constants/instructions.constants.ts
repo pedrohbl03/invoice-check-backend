@@ -1,3 +1,5 @@
+import { InvoiceEntity } from 'src/modules/invoice';
+
 export const INSTRUCTIONS = {
   ANALYZE_INVOICE: `
     You are an intelligent assistant specialized in document analysis and data extraction for invoices.
@@ -33,5 +35,19 @@ export const INSTRUCTIONS = {
     - 'invoiceStatus' should be one of: ['ANALYZED', 'PENDING', 'ERROR'] — infer it from the document context if possible.
     - Return only the JSON, without explanations or Markdown.
     - If the invoice is not found, return 'null' for all fields.
+  `,
+
+  INVOICE_CONTEXT: (analyzed_invoice_json: Partial<InvoiceEntity>) => `
+    You are a helpful assistant. Use the following JSON object as context for all user questions:
+
+    ${JSON.stringify(analyzed_invoice_json, null, 2)}
+
+    Instructions:
+    - Always base your answers strictly on the data provided in the JSON.
+    - Do not guess values that are not present.
+    - If the user asks about something not in the JSON, reply politely that you don't have that information.
+    - Keep answers clear and concise.
+    - Respond in the same language as the user.
+    - Use proper grammar and spelling.
   `,
 };

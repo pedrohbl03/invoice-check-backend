@@ -2,11 +2,15 @@ import { Transform } from 'class-transformer';
 import { EnumInvoiceStatus, Invoice } from 'generated/prisma';
 import { Decimal } from 'generated/prisma/runtime/library';
 import { InvoiceItemEntity } from './invoice-item.entity';
-import { InteractionEntity } from './invoice-interaction.entity';
+import { ChatEntity } from './invoice-chat.entity';
 
 export class InvoiceEntity implements Invoice {
   constructor(partial: Partial<InvoiceEntity>) {
-    if (partial.invoiceDate) {
+    if (
+      partial &&
+      partial.invoiceDate &&
+      !(partial.invoiceDate instanceof Date)
+    ) {
       partial.invoiceDate = new Date(partial.invoiceDate);
     }
 
@@ -35,7 +39,7 @@ export class InvoiceEntity implements Invoice {
   fileOriginalName: string | null;
 
   invoiceItems: InvoiceItemEntity[];
-  interactions: InteractionEntity[];
+  chatHistory: ChatEntity;
 
   createdAt: Date;
   updatedAt: Date;

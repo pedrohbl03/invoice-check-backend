@@ -1,6 +1,7 @@
 import { PrismaService } from 'src/database';
 import { InvoiceEntity } from '../../domain';
 import { Injectable } from '@nestjs/common';
+import { ChatEntity } from '../../domain/entities/invoice-chat.entity';
 
 @Injectable()
 export class InvoiceRepository {
@@ -15,15 +16,23 @@ export class InvoiceRepository {
             createMany: { data: invoice.invoiceItems },
           },
         }),
-        ...(invoice.interactions && {
-          interactions: {
-            createMany: { data: invoice.interactions },
+
+        // Create chat history if it not exists
+        ...(invoice.chatHistory && {
+          chatHistory: {
+            create: {
+              ...(invoice.chatHistory.chatInteractions && {
+                chatInteractions: {
+                  createMany: { data: invoice.chatHistory.chatInteractions },
+                },
+              }),
+            },
           },
         }),
       },
       include: {
         invoiceItems: true,
-        interactions: true,
+        chatHistory: true,
       },
     });
 
@@ -38,20 +47,32 @@ export class InvoiceRepository {
     id: string,
     invoice: Partial<InvoiceEntity>,
   ): Promise<InvoiceEntity> {
-    const { invoiceItems, interactions, ...invoiceData } = invoice;
     const updatedInvoice = await this.prisma.invoice.update({
       where: { id },
-      data: invoiceData,
+      data: {
+        id: invoice.id,
+        userId: invoice.userId,
+        invoiceUrl: invoice.invoiceUrl,
+        invoiceStatus: invoice.invoiceStatus,
+        invoiceAmount: invoice.invoiceAmount,
+        invoiceDate: invoice.invoiceDate,
+        invoiceDiscount: invoice.invoiceDiscount,
+        invoiceTax: invoice.invoiceTax,
+        shipperName: invoice.shipperName,
+        consigneeName: invoice.consigneeName,
+        invoiceNumber: invoice.invoiceNumber,
+        fileOriginalName: invoice.fileOriginalName,
+      },
     });
 
     return new InvoiceEntity(updatedInvoice);
   }
 
-  async updateInvoiceWithNewItemsAndInteractions(
+  async updateInvoiceRelationships(
     id: string,
     invoice: Partial<InvoiceEntity>,
   ): Promise<InvoiceEntity> {
-    const { invoiceItems, interactions, ...invoiceData } = invoice;
+    const { invoiceItems, chatHistory, ...invoiceData } = invoice;
     const updatedInvoice = await this.prisma.invoice.update({
       where: { id },
       data: {
@@ -61,15 +82,21 @@ export class InvoiceRepository {
             createMany: { data: invoiceItems },
           },
         }),
-        ...(interactions && {
-          interactions: {
-            createMany: { data: interactions },
+        ...(chatHistory && {
+          chat: {
+            create: {
+              ...(chatHistory?.chatInteractions && {
+                chatInteractions: {
+                  createMany: { data: chatHistory.chatInteractions },
+                },
+              }),
+            },
           },
         }),
       },
       include: {
         invoiceItems: true,
-        interactions: true,
+        chatHistory: true,
       },
     });
 
@@ -106,5 +133,50 @@ export class InvoiceRepository {
     });
 
     return invoices.map((invoice) => new InvoiceEntity(invoice));
+  }
+
+  async createChatHistory(invoiceId: string): Promise<ChatEntity> {
+    const newChat = await this.prisma.chat.create({
+      data: {
+        invoiceId,
+      },
+    });
+
+    return new ChatEntity({
+      ...newChat,
+    });
+  }
+
+  async getChatHistoryByInvoiceId(
+    invoiceId: string,
+  ): Promise<ChatEntity | null> {
+    const chat = await this.prisma.chat.findUnique({
+      where: { invoiceId },
+      include: {
+        chatInteractions: true,
+      },
+    });
+
+    if (!chat) {
+      return null;
+    }
+
+    return new ChatEntity({
+      ...chat,
+    });
+  }
+
+  async createChatInteraction(
+    chatId: string,
+    role: 'USER' | 'ASSISTANT',
+    content: string,
+  ): Promise<void> {
+    await this.prisma.chatInteraction.create({
+      data: {
+        chatId: chatId,
+        role,
+        content,
+      },
+    });
   }
 }
