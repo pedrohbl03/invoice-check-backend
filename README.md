@@ -55,7 +55,7 @@ Certifique-se de ter instalado:
 
 - [Node.js](https://nodejs.org/) (versão 18 ou superior)
 - [Yarn](https://yarnpkg.com/) ou npm
-- [PostgreSQL](https://www.postgresql.org/) (versão 13 ou superior)
+- [PostgreSQL](https://www.postgresql.org/) (versão 13 ou superior ou opte por algum banco em nuvem (neon na vercel, por exemplo))
 - [Git](https://git-scm.com/)
 
 ### 🔧 Configuração do Ambiente
@@ -85,8 +85,6 @@ DATABASE_URL="postgresql://username:password@localhost:5432/ocr_invoice_db"
 
 # JWT
 JWT_SECRET="seu-jwt-secret-super-seguro-minimo-24-caracteres"
-JWT_ACCESS_EXPIRES_IN="15m"
-JWT_REFRESH_EXPIRES_IN="7d"
 
 # OpenAI
 OPENAI_API_KEY="sua-chave-da-openai"
@@ -109,10 +107,13 @@ CORS_ORIGIN="*"
 
 ```bash
 # Execute as migrações do Prisma
-yarn prisma migrate dev
+npx prisma migrate dev
 
 # (Opcional) Visualize o banco de dados
-yarn prisma studio
+npx prisma studio
+
+# Fazer o sync do prisma client no seu local.
+npx prisma generate
 ```
 
 #### 5. Execute a Aplicação
@@ -273,10 +274,11 @@ DATABASE_URL="postgresql://usuario:senha@localhost:5432/nome_do_banco"
 #### Erro de Migração
 ```bash
 # Reset do banco (CUIDADO: apaga todos os dados)
-yarn prisma migrate reset
+npx prisma migrate reset
 
 # Ou execute migrações manualmente
-yarn prisma migrate dev --name init
+npx prisma migrate dev --name init
+
 ```
 
 #### Erro de OpenAI
@@ -292,11 +294,9 @@ yarn prisma migrate dev --name init
 ---
 
 ## 📈 Próximos Passos
-
-- [ ] Implementar cache com Redis
+- [ ] Containerizar a aplicação com docker
 - [ ] Adicionar testes de integração
 - [ ] Implementar rate limiting
-- [ ] Adicionar monitoramento com Prometheus
 - [ ] Implementar CI/CD com GitHub Actions
 - [ ] Adicionar suporte a mais formatos de arquivo
 
@@ -329,5 +329,5 @@ Se você encontrar algum problema ou tiver dúvidas:
 ---
 
 <p align="center">
-  Desenvolvido com ❤️ usando NestJS
+  Desenvolvido com ❤️ usando Pedro Lima
 </p>
