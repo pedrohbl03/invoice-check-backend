@@ -1,4 +1,4 @@
-import { InvoiceEntity } from '@/modules/invoice';
+import { InvoiceEntity } from '../../../../modules/invoice';
 
 export const INSTRUCTIONS = {
   ANALYZE_INVOICE: `

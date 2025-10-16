@@ -8,13 +8,16 @@ import {
   formatCDNUrl,
   generateInvoiceKey,
 } from '../../infrastructure/utils/formatCDNurl';
-import { InteractionNotFoundError, OpenAIService } from '@/modules/openai';
+import {
+  InteractionNotFoundError,
+  OpenAIService,
+} from '../../../../modules/openai';
 import {
   InvoiceNotFoundError,
   InvoiceProcessingError,
   InvoiceValidationError,
 } from '../../invoice.error';
-import { StorageUploadError } from '../../../..//database/storage/storage.error';
+import { StorageUploadError } from '../../../../database/storage/storage.error';
 import { ChatEntity } from '../../domain/entities/invoice-chat.entity';
 import { PdfService } from './pdf.service';
 
