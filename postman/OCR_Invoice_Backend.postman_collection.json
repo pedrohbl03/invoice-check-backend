@@ -19,10 +19,12 @@
 								"exec": [
 									"if (pm.response.code === 201) {",
 									"    const jsonData = pm.response.json();",
-									"    pm.globals.set(\"accessToken\", jsonData.tokens.accessToken);",
-									"    pm.globals.set(\"refreshToken\", jsonData.tokens.refreshToken);",
+									"    pm.globals.set(\"accessToken\", jsonData.tokens.accessToken.token);",
+									"    pm.globals.set(\"refreshToken\", jsonData.tokens.refreshToken.token);",
 									"    pm.globals.set(\"userId\", jsonData.user.id);",
 									"    console.log(\"Tokens salvos automaticamente\");",
+									"} else {",
+									"    console.log(\"Erro no registro: \" + pm.response.text());",
 									"}"
 								],
 								"type": "text/javascript"
@@ -39,7 +41,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"name\": \"João Silva\",\n  \"email\": \"joao.silva@email.com\",\n  \"password\": \"senha123\"\n}"
+							"raw": "{\n  \"name\": \"João Silva\",\n  \"email\": \"joao.silva@email.com\",\n  \"password\": \"senha123456\"\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/auth/register",
@@ -62,12 +64,14 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"if (pm.response.code === 201) {",
+									"if (pm.response.code === 200) {",
 									"    const jsonData = pm.response.json();",
-									"    pm.globals.set(\"accessToken\", jsonData.tokens.accessToken);",
-									"    pm.globals.set(\"refreshToken\", jsonData.tokens.refreshToken);",
+									"    pm.globals.set(\"accessToken\", jsonData.tokens.accessToken.token);",
+									"    pm.globals.set(\"refreshToken\", jsonData.tokens.refreshToken.token);",
 									"    pm.globals.set(\"userId\", jsonData.user.id);",
 									"    console.log(\"Login realizado com sucesso - Tokens salvos\");",
+									"} else {",
+									"    console.log(\"Erro no login: \" + pm.response.text());",
 									"}"
 								],
 								"type": "text/javascript"
@@ -84,7 +88,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"email\": \"joao.silva@email.com\",\n  \"password\": \"senha123\"\n}"
+							"raw": "{\n  \"email\": \"joao.silva@email.com\",\n  \"password\": \"senha123456\"\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/auth/login",
@@ -138,6 +142,16 @@
 				{
 					"name": "Create User",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
 						"header": [
 							{
@@ -147,7 +161,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"name\": \"Maria Santos\",\n  \"email\": \"maria.santos@email.com\",\n  \"password\": \"senha456\",\n  \"role\": \"USER\"\n}"
+							"raw": "{\n  \"name\": \"Maria Santos\",\n  \"email\": \"maria.santos@email.com\",\n  \"password\": \"senha456789\",\n  \"role\": \"USER\"\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/users",
@@ -165,6 +179,16 @@
 				{
 					"name": "Get All Users",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
 						"header": [],
 						"url": {
@@ -183,6 +207,16 @@
 				{
 					"name": "Get User by ID",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
 						"header": [],
 						"url": {
@@ -202,6 +236,16 @@
 				{
 					"name": "Update User",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "PUT",
 						"header": [
 							{
@@ -230,6 +274,16 @@
 				{
 					"name": "Delete User",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "DELETE",
 						"header": [],
 						"url": {
@@ -263,6 +317,8 @@
 									"    const jsonData = pm.response.json();",
 									"    pm.globals.set(\"invoiceId\", jsonData.id);",
 									"    console.log(\"Invoice ID salvo: \" + jsonData.id);",
+									"} else {",
+									"    console.log(\"Erro no upload: \" + pm.response.text());",
 									"}"
 								],
 								"type": "text/javascript"
@@ -289,7 +345,7 @@
 									"key": "file",
 									"type": "file",
 									"src": [],
-									"description": "Arquivo da fatura (PDF, JPG, PNG)"
+									"description": "Arquivo da fatura (PNG, JPG, JPEG) - Máximo 10MB"
 								}
 							]
 						},
@@ -360,6 +416,36 @@
 							]
 						},
 						"description": "Busca uma fatura específica por ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Invoices by User ID",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/invoices/user/{{userId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"invoices",
+								"user",
+								"{{userId}}"
+							]
+						},
+						"description": "Lista todas as faturas de um usuário específico"
 					},
 					"response": []
 				},
@@ -460,6 +546,36 @@
 						"description": "Envia uma mensagem no chat de uma fatura específica"
 					},
 					"response": []
+				},
+				{
+					"name": "Generate Invoice PDF",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/invoices/{{invoiceId}}/pdf",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"invoices",
+								"{{invoiceId}}",
+								"pdf"
+							]
+						},
+						"description": "Gera PDF da fatura analisada"
+					},
+					"response": []
 				}
 			],
 			"description": "Endpoints para gerenciamento de faturas e funcionalidades de chat"
@@ -525,7 +641,17 @@
 				"type": "text/javascript",
 				"exec": [
 					"// Script executado após cada requisição",
-					"console.log('Status da resposta: ' + pm.response.code);"
+					"console.log('Status da resposta: ' + pm.response.code);",
+					"console.log('Tempo de resposta: ' + pm.response.responseTime + 'ms');",
+					"",
+					"// Validações básicas",
+					"pm.test('Status code is valid', function () {",
+					"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 409, 422, 500]);",
+					"});",
+					"",
+					"pm.test('Response time is acceptable', function () {",
+					"    pm.expect(pm.response.responseTime).to.be.below(10000);",
+					"});"
 				]
 			}
 		}

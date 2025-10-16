@@ -1,98 +1,333 @@
+# 🧾 OCR Invoice Backend
+
 <p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
+  <img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" />
 </p>
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
-
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
+<p align="center">
+  <strong>Sistema de processamento de faturas com OCR e IA</strong>
 </p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
-## Description
+<p align="center">
+  <a href="https://nestjs.com/" target="_blank">NestJS</a> • 
+  <a href="https://www.prisma.io/" target="_blank">Prisma</a> • 
+  <a href="https://openai.com/" target="_blank">OpenAI</a> • 
+  <a href="https://www.postgresql.org/" target="_blank">PostgreSQL</a>
+</p>
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+---
 
-## Project setup
+## 📋 Sobre o Projeto
+
+Sistema backend desenvolvido em NestJS para processamento automático de faturas utilizando OCR (Optical Character Recognition) e Inteligência Artificial. O sistema permite upload de faturas em formato de imagem, extração automática de dados e interação via chat com IA para análise detalhada.
+
+### ✨ Principais Funcionalidades
+
+- 🔐 **Autenticação JWT** com refresh tokens
+- 📤 **Upload de faturas** (PNG, JPG, JPEG)
+- 🤖 **Processamento OCR** com OpenAI
+- 💬 **Chat interativo** para análise de faturas
+- 📄 **Geração de PDFs** das faturas processadas
+- 🏗️ **Arquitetura Clean** com separação de responsabilidades
+- 📊 **Validação robusta** com class-validator
+- 📚 **Documentação Swagger** automática
+
+---
+
+## 🛠️ Tecnologias Utilizadas
+
+- **Framework**: NestJS (Node.js)
+- **Banco de Dados**: PostgreSQL + Prisma ORM
+- **Autenticação**: JWT (JSON Web Tokens)
+- **IA/OCR**: OpenAI API
+- **Storage**: Cloudflare R2
+- **Validação**: class-validator + class-transformer
+- **Documentação**: Swagger/OpenAPI
+- **Testes**: Jest
+
+---
+
+## 🚀 Como Executar Localmente
+
+### 📋 Pré-requisitos
+
+Certifique-se de ter instalado:
+
+- [Node.js](https://nodejs.org/) (versão 18 ou superior)
+- [Yarn](https://yarnpkg.com/) ou npm
+- [PostgreSQL](https://www.postgresql.org/) (versão 13 ou superior)
+- [Git](https://git-scm.com/)
+
+### 🔧 Configuração do Ambiente
+
+#### 1. Clone o Repositório
 
 ```bash
-$ yarn install
+git clone <seu-repositorio>
+cd ocr-invoice-backend
 ```
 
-## Compile and run the project
+#### 2. Instale as Dependências
 
 ```bash
-# development
-$ yarn run start
-
-# watch mode
-$ yarn run start:dev
-
-# production mode
-$ yarn run start:prod
+yarn install
+# ou
+npm install
 ```
 
-## Run tests
+#### 3. Configure as Variáveis de Ambiente
+
+Crie um arquivo `.env` na raiz do projeto:
+
+```env
+# Database
+DATABASE_URL="postgresql://username:password@localhost:5432/ocr_invoice_db"
+
+# JWT
+JWT_SECRET="seu-jwt-secret-super-seguro-minimo-24-caracteres"
+JWT_ACCESS_EXPIRES_IN="15m"
+JWT_REFRESH_EXPIRES_IN="7d"
+
+# OpenAI
+OPENAI_API_KEY="sua-chave-da-openai"
+
+# Cloudflare R2 (Storage)
+R2_ACCOUNT_ID="seu-account-id"
+R2_ACCESS_KEY_ID="sua-access-key"
+R2_SECRET_ACCESS_KEY="sua-secret-key"
+R2_BUCKET_NAME="seu-bucket-name"
+R2_ENDPOINT="https://seu-account-id.r2.cloudflarestorage.com"
+R2_CDN_URL="https://seu-cdn-url.com"
+
+# Application
+NODE_ENV="development"
+PORT=3000
+CORS_ORIGIN="*"
+```
+
+#### 4. Configure o Banco de Dados
 
 ```bash
-# unit tests
-$ yarn run test
+# Execute as migrações do Prisma
+yarn prisma migrate dev
 
-# e2e tests
-$ yarn run test:e2e
-
-# test coverage
-$ yarn run test:cov
+# (Opcional) Visualize o banco de dados
+yarn prisma studio
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+#### 5. Execute a Aplicação
 
 ```bash
-$ yarn install -g @nestjs/mau
-$ mau deploy
+# Modo desenvolvimento (com hot reload)
+yarn start:dev
+
+# Modo produção
+yarn build
+yarn start:prod
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+### 🌐 Acessando a Aplicação
 
-## Resources
+Após executar, a aplicação estará disponível em:
 
-Check out a few resources that may come in handy when working with NestJS:
+- **API**: http://localhost:3000/api/v1
+- **Documentação Swagger**: http://localhost:3000/docs/swagger
+- **Health Check**: http://localhost:3000/api/v1/
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+---
 
-## Support
+## 📚 Documentação da API
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+### 🔗 Endpoints Principais
 
-## Stay in touch
+#### Autenticação
+- `POST /auth/register` - Registrar usuário
+- `POST /auth/login` - Fazer login
+- `POST /auth/logout` - Fazer logout
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+#### Usuários
+- `GET /users` - Listar usuários
+- `GET /users/:id` - Buscar usuário por ID
+- `POST /users` - Criar usuário
+- `PUT /users/:id` - Atualizar usuário
+- `DELETE /users/:id` - Deletar usuário
 
-## License
+#### Faturas
+- `POST /invoices` - Upload de fatura
+- `GET /invoices` - Listar faturas
+- `GET /invoices/:id` - Buscar fatura por ID
+- `GET /invoices/user/:id` - Faturas por usuário
+- `DELETE /invoices/:id` - Deletar fatura
+- `GET /invoices/:id/pdf` - Gerar PDF
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+#### Chat
+- `GET /invoices/:id/chat` - Histórico do chat
+- `POST /invoices/:id/chat` - Enviar mensagem
+
+### 📖 Documentação Completa
+
+Acesse a documentação interativa do Swagger em: http://localhost:3000/docs/swagger
+
+---
+
+## 🧪 Testando a API
+
+### Usando Postman
+
+1. Importe a collection do Postman (arquivo em `/postman/`)
+2. Configure o environment "Local Development"
+3. Execute primeiro "Register User" ou "Login User"
+4. Os tokens serão salvos automaticamente
+5. Teste os outros endpoints
+
+### Exemplo de Requisição
+
+```bash
+# Registrar usuário
+curl -X POST http://localhost:3000/api/v1/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "João Silva",
+    "email": "joao@email.com",
+    "password": "senha123456"
+  }'
+
+# Upload de fatura
+curl -X POST http://localhost:3000/api/v1/invoices \
+  -H "Authorization: Bearer SEU_TOKEN_AQUI" \
+  -F "file=@caminho/para/sua/fatura.jpg"
+```
+
+---
+
+## 🏗️ Arquitetura do Projeto
+
+```
+src/
+├── common/                 # Código compartilhado
+│   ├── filters/           # Filtros de exceção
+│   ├── interceptors/      # Interceptors globais
+│   └── errors/           # Classes de erro customizadas
+├── config/               # Configurações da aplicação
+├── database/             # Configuração do banco
+│   ├── prisma/          # Prisma service
+│   └── storage/         # Serviço de storage
+└── modules/              # Módulos da aplicação
+    ├── auth/            # Autenticação
+    ├── user/            # Gerenciamento de usuários
+    ├── invoice/         # Processamento de faturas
+    └── openai/          # Integração com OpenAI
+```
+
+### 🎯 Padrões Implementados
+
+- **Clean Architecture** - Separação clara de responsabilidades
+- **Repository Pattern** - Abstração da camada de dados
+- **DTO Pattern** - Validação e transformação de dados
+- **Dependency Injection** - Inversão de dependências
+- **Error Handling** - Tratamento centralizado de erros
+
+---
+
+## 🔧 Scripts Disponíveis
+
+```bash
+# Desenvolvimento
+yarn start:dev          # Executa em modo desenvolvimento
+yarn start:debug        # Executa em modo debug
+
+# Produção
+yarn build              # Compila o projeto
+yarn start:prod         # Executa em modo produção
+
+# Banco de Dados
+yarn prisma migrate dev  # Executa migrações
+yarn prisma generate    # Gera cliente Prisma
+yarn prisma studio      # Interface visual do banco
+
+# Testes
+yarn test               # Testes unitários
+yarn test:e2e           # Testes end-to-end
+yarn test:cov           # Cobertura de testes
+
+# Linting
+yarn lint               # Verifica código
+yarn lint:fix           # Corrige problemas de lint
+```
+
+---
+
+## 🐛 Troubleshooting
+
+### Problemas Comuns
+
+#### Erro de Conexão com Banco
+```bash
+# Verifique se o PostgreSQL está rodando
+sudo service postgresql status
+
+# Verifique a string de conexão no .env
+DATABASE_URL="postgresql://usuario:senha@localhost:5432/nome_do_banco"
+```
+
+#### Erro de Migração
+```bash
+# Reset do banco (CUIDADO: apaga todos os dados)
+yarn prisma migrate reset
+
+# Ou execute migrações manualmente
+yarn prisma migrate dev --name init
+```
+
+#### Erro de OpenAI
+- Verifique se a chave da API está correta
+- Confirme se tem créditos disponíveis
+- Verifique a conectividade com a internet
+
+#### Erro de Storage (R2)
+- Verifique as credenciais do Cloudflare R2
+- Confirme se o bucket existe
+- Verifique as permissões de acesso
+
+---
+
+## 📈 Próximos Passos
+
+- [ ] Implementar cache com Redis
+- [ ] Adicionar testes de integração
+- [ ] Implementar rate limiting
+- [ ] Adicionar monitoramento com Prometheus
+- [ ] Implementar CI/CD com GitHub Actions
+- [ ] Adicionar suporte a mais formatos de arquivo
+
+---
+
+## 🤝 Contribuindo
+
+1. Fork o projeto
+2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
+3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
+4. Push para a branch (`git push origin feature/AmazingFeature`)
+5. Abra um Pull Request
+
+---
+
+## 📄 Licença
+
+Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+
+---
+
+## 📞 Suporte
+
+Se você encontrar algum problema ou tiver dúvidas:
+
+1. Verifique a [documentação do Swagger](http://localhost:3000/docs/swagger)
+2. Consulte os [issues do projeto](../../issues)
+3. Abra uma nova issue descrevendo o problema
+
+---
+
+<p align="center">
+  Desenvolvido com ❤️ usando NestJS
+</p>

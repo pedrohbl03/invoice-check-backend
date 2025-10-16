@@ -1,157 +1,139 @@
-# Collection Postman - OCR Invoice Backend
+# OCR Invoice Backend - Postman Collection
 
-Esta pasta contém a collection completa do Postman para testar todos os endpoints do sistema OCR Invoice Backend.
+Esta collection contém todos os endpoints da API OCR Invoice Backend desenvolvida em NestJS.
 
-## Arquivos Inclusos
+## 📋 Pré-requisitos
 
-### 1. `OCR_Invoice_Backend.postman_collection.json`
-Collection principal contendo todos os endpoints organizados por módulos:
+- Node.js instalado
+- Aplicação rodando em `http://localhost:3000`
+- Postman instalado
 
-#### 📁 **Authentication**
-- **POST** `/auth/register` - Registra um novo usuário
-- **POST** `/auth/login` - Autentica usuário e retorna tokens JWT
-- **POST** `/auth/logout` - Faz logout do usuário autenticado
+## 🚀 Como usar
 
-#### 📁 **Users Management**
-- **POST** `/users` - Cria um novo usuário
-- **GET** `/users` - Lista todos os usuários
-- **GET** `/users/:id` - Busca usuário por ID
-- **PUT** `/users/:id` - Atualiza dados do usuário
-- **DELETE** `/users/:id` - Remove usuário
+### 1. Importar Collection e Environment
 
-#### 📁 **Invoice Management**
-- **POST** `/invoices` - Upload de fatura (multipart/form-data)
-- **GET** `/invoices` - Lista todas as faturas
-- **GET** `/invoices/:id` - Busca fatura por ID
-- **DELETE** `/invoices/:id` - Remove fatura
-- **GET** `/invoices/:id/chat` - Obtém histórico de chat da fatura
-- **POST** `/invoices/:id/chat` - Envia mensagem no chat da fatura
-
-#### 📁 **Health Check**
-- **GET** `/` - Verifica se a API está funcionando
-- **GET** `/docs/swagger` - Acessa documentação Swagger
-
-### 2. `Local_Development.postman_environment.json`
-Environment configurado para desenvolvimento local com variáveis:
-
-- `baseUrl`: http://localhost:3000/api/v1
-- `accessToken`: Token JWT (preenchido automaticamente)
-- `refreshToken`: Token de refresh (preenchido automaticamente)  
-- `userId`: ID do usuário logado (preenchido automaticamente)
-- `invoiceId`: ID da fatura (preenchido automaticamente)
-
-## Como Usar
-
-### 1. **Importar no Postman**
 1. Abra o Postman
-2. Clique em "Import"
-3. Selecione os dois arquivos JSON desta pasta
-4. A collection e o environment serão importados automaticamente
+2. Clique em **Import**
+3. Selecione os arquivos:
+   - `OCR_Invoice_Backend.postman_collection.json`
+   - `Local_Development.postman_environment.json`
+4. Selecione o environment **"OCR Invoice Backend - Local Development"**
 
-### 2. **Configurar Environment**
-1. No Postman, selecione o environment "OCR Invoice Backend - Local Development"
-2. Verifique se a `baseUrl` está correta (http://localhost:3000/api/v1)
+### 2. Fluxo de Teste Recomendado
 
-### 3. **Iniciar o Servidor**
-Certifique-se de que o servidor NestJS está rodando:
-```bash
-npm run start:dev
-```
+#### Passo 1: Autenticação
+1. Execute **"Register User"** ou **"Login User"**
+2. Os tokens serão salvos automaticamente nas variáveis globais
+3. Verifique no console do Postman se os tokens foram salvos
 
-### 4. **Fluxo de Teste Recomendado**
+#### Passo 2: Testar Usuários (Opcional)
+1. **"Get All Users"** - Lista todos os usuários
+2. **"Get User by ID"** - Busca usuário específico
+3. **"Update User"** - Atualiza dados do usuário
+4. **"Delete User"** - Remove usuário (cuidado!)
 
-#### **Passo 1: Autenticação**
-1. Execute **Register User** para criar uma conta
-2. Ou execute **Login User** se já tiver uma conta
-3. Os tokens serão salvos automaticamente nas variáveis do environment
+#### Passo 3: Testar Faturas
+1. **"Upload Invoice"** - Faça upload de uma imagem (PNG/JPG/JPEG)
+2. **"Get All Invoices"** - Lista todas as faturas
+3. **"Get Invoice by ID"** - Busca fatura específica
+4. **"Get Chat History"** - Ver histórico de chat
+5. **"Send Chat Message"** - Enviar mensagem no chat
+6. **"Generate Invoice PDF"** - Gerar PDF da fatura
 
-#### **Passo 2: Gerenciar Usuários** (Opcional)
-1. **Get All Users** - Para ver todos os usuários
-2. **Get User by ID** - Para buscar usuário específico
-3. **Update User** - Para atualizar dados
-4. **Delete User** - Para remover usuário
+## 🔧 Configurações
 
-#### **Passo 3: Gerenciar Faturas**
-1. **Upload Invoice** - Faça upload de um arquivo (PDF, JPG, PNG)
-   - O ID da fatura será salvo automaticamente
-2. **Get All Invoices** - Para ver todas as faturas
-3. **Get Invoice by ID** - Para ver detalhes de uma fatura específica
+### Environment Variables
 
-#### **Passo 4: Testar Chat** (Se disponível)
-1. **Get Chat History** - Para ver histórico de conversas
-2. **Send Chat Message** - Para enviar mensagem sobre a fatura
+- **baseUrl**: `http://localhost:3000/api/v1`
+- **accessToken**: Token JWT (preenchido automaticamente)
+- **refreshToken**: Token de refresh (preenchido automaticamente)
+- **userId**: ID do usuário (preenchido automaticamente)
+- **invoiceId**: ID da fatura (preenchido automaticamente)
 
-## Recursos Automáticos
+### Validações Automáticas
 
-### **Auto-Save de Tokens**
-- Após login/register bem-sucedido, os tokens JWT são salvos automaticamente
-- Não é necessário copiar/colar tokens manualmente
+A collection inclui testes automáticos que verificam:
+- ✅ Status codes válidos (200, 201, 204, 400, 401, 403, 404, 409, 422, 500)
+- ✅ Tempo de resposta aceitável (< 10 segundos)
+- ✅ Salvamento automático de tokens após login/registro
+- ✅ Salvamento automático de invoiceId após upload
 
-### **Auto-Save de IDs**
-- User ID é salvo automaticamente após login/register
-- Invoice ID é salvo automaticamente após upload
+## 📁 Estrutura da Collection
 
-### **Autenticação Automática**
-- Endpoints protegidos usam automaticamente o token salvo
-- Headers de autorização são configurados automaticamente
+### Authentication
+- **Register User**: Registra novo usuário
+- **Login User**: Autentica usuário existente
+- **Logout User**: Faz logout (requer autenticação)
 
-## Exemplos de Dados
+### Users Management
+- **Create User**: Cria novo usuário (requer autenticação)
+- **Get All Users**: Lista todos os usuários (requer autenticação)
+- **Get User by ID**: Busca usuário por ID (requer autenticação)
+- **Update User**: Atualiza dados do usuário (requer autenticação)
+- **Delete User**: Remove usuário (requer autenticação)
 
-### **Registro/Login**
-```json
-{
-  "name": "João Silva",
-  "email": "joao.silva@email.com", 
-  "password": "senha123"
-}
-```
+### Invoice Management
+- **Upload Invoice**: Upload de fatura (PNG/JPG/JPEG, máx 10MB)
+- **Get All Invoices**: Lista todas as faturas
+- **Get Invoice by ID**: Busca fatura por ID
+- **Get Invoices by User ID**: Lista faturas por usuário
+- **Delete Invoice**: Remove fatura
+- **Get Chat History**: Histórico de chat da fatura
+- **Send Chat Message**: Enviar mensagem no chat
+- **Generate Invoice PDF**: Gerar PDF da fatura
 
-### **Criação de Usuário**
-```json
-{
-  "name": "Maria Santos",
-  "email": "maria.santos@email.com",
-  "password": "senha456",
-  "role": "USER"
-}
-```
+### Health Check
+- **API Health Check**: Verifica se API está funcionando
+- **Swagger Documentation**: Acessa documentação Swagger
 
-### **Mensagem de Chat**
-```json
-{
-  "message": "Pode me explicar os detalhes desta fatura?"
-}
-```
+## 🔒 Autenticação
 
-## Troubleshooting
+Todos os endpoints protegidos usam **Bearer Token**:
+- Token é obtido automaticamente após login/registro
+- Token é incluído automaticamente em requisições protegidas
+- Use **"Logout User"** para invalidar o token
 
-### **Token Expirado**
-Se receber erro 401, faça login novamente para obter novos tokens.
+## 📤 Upload de Arquivos
 
-### **Servidor Não Responde**
-Verifique se:
-- O servidor está rodando na porta 3000
-- A URL base está correta no environment
-- Não há conflitos de porta
-
-### **Upload de Arquivo**
 Para testar upload de faturas:
-- Use arquivos PDF, JPG ou PNG
-- Tamanho máximo recomendado: 10MB
-- Selecione o arquivo no campo "file" do form-data
+1. Use o endpoint **"Upload Invoice"**
+2. Selecione uma imagem (PNG, JPG, JPEG)
+3. Tamanho máximo: 10MB
+4. O invoiceId será salvo automaticamente para uso posterior
 
-## Swagger Documentation
+## 🐛 Troubleshooting
 
-A API também possui documentação Swagger disponível em:
-http://localhost:3000/docs/swagger
+### Erro 401 (Unauthorized)
+- Execute **"Login User"** primeiro
+- Verifique se o token foi salvo nas variáveis globais
 
-Esta documentação complementa os testes do Postman com:
-- Esquemas detalhados dos DTOs
-- Exemplos de responses
-- Validações de campos
-- Códigos de status HTTP
+### Erro 400 (Bad Request)
+- Verifique se o JSON está correto
+- Para uploads, verifique se o arquivo é PNG/JPG/JPEG e < 10MB
+
+### Erro 404 (Not Found)
+- Verifique se a aplicação está rodando em `http://localhost:3000`
+- Verifique se o endpoint existe na API
+
+### Token não está sendo salvo
+- Verifique o console do Postman para erros
+- Execute novamente **"Login User"** ou **"Register User"**
+
+## 📝 Logs
+
+Monitore o console do Postman para:
+- Status das requisições
+- Tempo de resposta
+- Tokens sendo salvos
+- Erros detalhados
+
+## 🔄 Atualizações
+
+Esta collection é atualizada conforme mudanças na API:
+- Novos endpoints são adicionados
+- Validações são melhoradas
+- Documentação é atualizada
 
 ---
 
-**Desenvolvido para o projeto OCR Invoice Backend**
-*Collection atualizada em: Outubro 2024*
+**Desenvolvido para OCR Invoice Backend API v1.0**
