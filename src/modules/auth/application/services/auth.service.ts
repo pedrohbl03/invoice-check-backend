@@ -19,12 +19,17 @@ export class AuthService {
   constructor(
     private readonly userService: UserService,
     private readonly tokensService: TokensService,
-  ) { }
+  ) {}
 
   async login(loginDto: LoginRequestDto): Promise<LoginResponseDto> {
     const user = await this.userService.findUserByEmail(loginDto.email);
 
-    if (!user || !user.password || !user.id || !(await passwordCompare(loginDto.password, user.password))) {
+    if (
+      !user ||
+      !user.password ||
+      !user.id ||
+      !(await passwordCompare(loginDto.password, user.password))
+    ) {
       throw new InvalidCredentialsError();
     }
 
@@ -36,7 +41,9 @@ export class AuthService {
   async register(
     registerRequestDto: RegisterRequestDto,
   ): Promise<RegisterResponseDto> {
-    const existingUser = await this.userService.findUserByEmail(registerRequestDto.email);
+    const existingUser = await this.userService.findUserByEmail(
+      registerRequestDto.email,
+    );
 
     if (existingUser) {
       throw new UserAlreadyExistsError();

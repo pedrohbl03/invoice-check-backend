@@ -33,12 +33,15 @@ export class UserService {
     return UserMapper.toResponse(createdUser);
   }
 
-  async updateUser(id: string, updateUserDto: UpdateUserDto): Promise<UserResponseDto> {
+  async updateUser(
+    id: string,
+    updateUserDto: UpdateUserDto,
+  ): Promise<UserResponseDto> {
     const user = await this.userRepository.findUserById(id);
 
     if (!user) {
       throw new UserNotFoundError();
-    } 
+    }
 
     const updatedUser = await this.userRepository.updateUser(
       id,

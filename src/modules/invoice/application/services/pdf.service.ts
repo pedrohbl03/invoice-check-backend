@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import PDFDocument from 'pdfkit';
-import { InvoiceEntity } from '../../domain';
 import download from '../../infrastructure/utils/download';
 import { InvoiceProcessingError } from '../../invoice.error';
 import { getFileNameByUrl } from '../../infrastructure/utils/files';

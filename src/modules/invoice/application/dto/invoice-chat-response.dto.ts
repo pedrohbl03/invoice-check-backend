@@ -1,8 +1,6 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { Exclude, Expose, Type } from "class-transformer";
-import { InvoiceChatMessageResponseDto } from "./invoice-chat-message-responde.dto";
-
-
+import { ApiProperty } from '@nestjs/swagger';
+import { Exclude, Expose, Type } from 'class-transformer';
+import { InvoiceChatMessageResponseDto } from './invoice-chat-message-responde.dto';
 
 export class InvoiceChatResponseDto {
   @ApiProperty() @Expose() id: string;
@@ -11,7 +9,8 @@ export class InvoiceChatResponseDto {
   @Exclude() updatedAt?: Date;
 
   @ApiProperty({ type: [InvoiceChatMessageResponseDto] })
-  @Expose() @Type(() => InvoiceChatMessageResponseDto)
+  @Expose()
+  @Type(() => InvoiceChatMessageResponseDto)
   chatInteractions?: InvoiceChatMessageResponseDto[];
 
   constructor(partial: Partial<InvoiceChatResponseDto>) {

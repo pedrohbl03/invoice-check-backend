@@ -13,5 +13,4 @@ export class ChatEntity implements Chat {
   updatedAt: Date;
 
   chatInteractions: ChatInteractionEntity[];
-  invoice: InvoiceEntity;
 }

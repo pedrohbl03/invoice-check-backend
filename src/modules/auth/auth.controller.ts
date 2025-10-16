@@ -33,7 +33,9 @@ export class AuthController {
     description: 'The user to register',
     type: RegisterRequestDto,
   })
-  async register(@Body() registerDto: RegisterRequestDto): Promise<RegisterResponseDto> {
+  async register(
+    @Body() registerDto: RegisterRequestDto,
+  ): Promise<RegisterResponseDto> {
     return this.authService.register(registerDto);
   }
 

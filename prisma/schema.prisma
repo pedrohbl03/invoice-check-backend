@@ -79,12 +79,12 @@ model Invoice {
 
   chatHistory  Chat?
   invoiceItems InvoiceItem[]
-
+  
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model InvoiceItem {
-  id           Int     @id @default(autoincrement())
+  id           Int    @id @default(autoincrement())
   invoiceId    String
   itemName     String
   itemQuantity Int
@@ -96,7 +96,7 @@ model InvoiceItem {
 
 model ChatInteraction {
   id        String              @id @default(uuid())
-  chatId    String              
+  chatId    String
   role      EnumInteractionRole
   content   String
   createdAt DateTime            @default(now())

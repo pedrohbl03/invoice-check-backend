@@ -1,22 +1,21 @@
 import { InvoiceEntity } from '../entities/invoice.entity';
-import { ChatEntity } from '../entities/invoice-chat.entity';
-import { ChatInteractionEntity } from '../entities/chat-interaction.entity';
+import { PrismaService } from '@/database';
 
 export interface IInvoiceRepository {
-  createInvoice(invoice: InvoiceEntity): Promise<InvoiceEntity>;
-  findInvoiceById(id: string): Promise<InvoiceEntity | null>;
-  findAllInvoices(): Promise<InvoiceEntity[]>;
+  createInvoice(
+    invoice: InvoiceEntity,
+    tx?: PrismaService,
+  ): Promise<InvoiceEntity>;
+  findInvoiceById(
+    id: string,
+    tx?: PrismaService,
+  ): Promise<InvoiceEntity | null>;
+  findAllInvoices(tx?: PrismaService): Promise<InvoiceEntity[]>;
   findInvoicesByUserId(userId: string): Promise<InvoiceEntity[]>;
-  deleteInvoice(id: string): Promise<void>;
+  deleteInvoice(id: string, tx?: PrismaService): Promise<void>;
   updateInvoice(
     id: string,
     invoice: Partial<InvoiceEntity>,
+    tx?: PrismaService,
   ): Promise<InvoiceEntity>;
-  getChatHistoryByInvoiceId(invoiceId: string): Promise<ChatEntity | null>;
-  createChatHistory(invoiceId: string): Promise<ChatEntity>;
-  createChatInteraction(
-    chatId: string,
-    role: 'USER' | 'ASSISTANT',
-    content: string,
-  ): Promise<ChatInteractionEntity>;
 }

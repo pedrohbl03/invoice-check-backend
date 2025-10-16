@@ -28,7 +28,6 @@ export class InvoiceController {
     description: 'The invoice has been successfully created.',
     type: InvoiceResponseDto,
   })
-
   uploadInvoice(
     @UploadedFile() file: Express.Multer.File,
     @Req() request: Request,
@@ -59,7 +58,9 @@ export class InvoiceController {
     description: 'The invoices have been successfully fetched.',
     type: [InvoiceResponseDto],
   })
-  findInvoicesByUserId(@Param('id') userId: string): Promise<InvoiceResponseDto[]> {
+  findInvoicesByUserId(
+    @Param('id') userId: string,
+  ): Promise<InvoiceResponseDto[]> {
     return this.invoiceService.findInvoicesByUserId(userId);
   }
 
@@ -76,7 +77,9 @@ export class InvoiceController {
     description: 'The chat history has been successfully fetched.',
     type: InvoiceChatResponseDto,
   })
-  getChatHistory(@Param('id') id: string): Promise<InvoiceChatResponseDto | null> {
+  getChatHistory(
+    @Param('id') id: string,
+  ): Promise<InvoiceChatResponseDto | null> {
     return this.invoiceService.getChatHistoryByInvoiceId(id);
   }
 

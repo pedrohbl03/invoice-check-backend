@@ -11,4 +11,8 @@ export class ChatInteractionEntity implements ChatInteraction {
 
   createdAt: Date;
   updatedAt: Date;
+
+  constructor(partial: Partial<ChatInteractionEntity>) {
+    Object.assign(this, partial);
+  }
 }

@@ -1,52 +1,61 @@
 import { PrismaService } from '../../../../database';
-import { InvoiceEntity } from '../../domain';
+import {
+  ChatEntity,
+  ChatInteractionEntity,
+  InvoiceEntity,
+  InvoiceItemEntity,
+} from '../../domain';
 import { Injectable } from '@nestjs/common';
-import { ChatEntity } from '../../domain/entities/invoice-chat.entity';
-import { InvoiceItemEntity } from '../../domain/entities/invoice-item.entity';
-import { ChatInteractionEntity } from '../../domain/entities/chat-interaction.entity';
 import { IInvoiceRepository } from '../../domain/repositories/invoice.repository.interface';
+import { Prisma } from 'generated/prisma';
 
 @Injectable()
 export class InvoiceRepository implements IInvoiceRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async createInvoice(invoice: InvoiceEntity): Promise<InvoiceEntity> {
-    const createdInvoice = await this.prisma.invoice.create({
+  private readonly INVOICE_INCLUDE = {
+    invoiceItems: true,
+    chatHistory: {
+      include: {
+        chatInteractions: true,
+      },
+    },
+  };
+
+  async createInvoice(
+    invoice: InvoiceEntity,
+    tx?: Prisma.TransactionClient,
+  ): Promise<InvoiceEntity> {
+    const prisma = tx || this.prisma;
+
+    const createdInvoice = await prisma.invoice.create({
       data: {
         ...invoice,
         ...(invoice.invoiceItems && {
           invoiceItems: {
-            createMany: { data: invoice.invoiceItems },
+            create: invoice.invoiceItems || [],
           },
         }),
         chatHistory: {
           create: {
-            ...(invoice.chatHistory?.chatInteractions && {
-              chatInteractions: {
-                createMany: { data: invoice.chatHistory.chatInteractions },
-              },
-            }),
+            chatInteractions: {
+              create: [],
+            },
           },
         },
       },
-      include: {
-        invoiceItems: true,
-        chatHistory: true,
-      },
+      include: this.INVOICE_INCLUDE,
     });
 
-    if (!createdInvoice) {
-      throw new Error('Failed to create invoice');
-    }
-
-    return new InvoiceEntity(createdInvoice as InvoiceEntity);
+    return this.mapInvoiceToEntity(createdInvoice);
   }
 
   async updateInvoice(
     id: string,
     invoice: Partial<InvoiceEntity>,
+    tx?: Prisma.TransactionClient,
   ): Promise<InvoiceEntity> {
-    const updatedInvoice = await this.prisma.invoice.update({
+    const updatedInvoice = await (tx || this.prisma).invoice.update({
       where: { id },
       data: {
         id: invoice.id,
@@ -64,15 +73,16 @@ export class InvoiceRepository implements IInvoiceRepository {
       },
     });
 
-    return new InvoiceEntity(updatedInvoice);
+    return this.mapInvoiceToEntity(updatedInvoice);
   }
 
   async updateInvoiceRelationships(
     id: string,
     invoice: Partial<InvoiceEntity>,
+    tx?: Prisma.TransactionClient,
   ): Promise<InvoiceEntity> {
     const { invoiceItems, chatHistory, ...invoiceData } = invoice;
-    const updatedInvoice = await this.prisma.invoice.update({
+    const updatedInvoice = await (tx || this.prisma).invoice.update({
       where: { id },
       data: {
         ...invoiceData,
@@ -86,134 +96,77 @@ export class InvoiceRepository implements IInvoiceRepository {
             create: {
               ...(chatHistory?.chatInteractions && {
                 chatInteractions: {
-                  createMany: { data: chatHistory.chatInteractions },
+                  create: chatHistory.chatInteractions,
                 },
               }),
             },
           },
         }),
       },
-      include: {
-        invoiceItems: true,
-        chatHistory: true,
-      },
+      include: this.INVOICE_INCLUDE,
     });
 
-    return new InvoiceEntity(updatedInvoice as InvoiceEntity);
+    return this.mapInvoiceToEntity(updatedInvoice);
   }
 
-  async findInvoiceById(id: string): Promise<InvoiceEntity | null> {
-    const invoice = await this.prisma.invoice.findUnique({
+  async findInvoiceById(
+    id: string,
+    tx?: Prisma.TransactionClient,
+  ): Promise<InvoiceEntity | null> {
+    const invoice = await (tx || this.prisma).invoice.findUnique({
       where: { id },
-      include: {
-        invoiceItems: {
-          select: {
-            itemName: true,
-            itemQuantity: true,
-            itemPrice: true,
-            itemTotal: true,
-          },
-        },
-        chatHistory: {
-          include: {
-            chatInteractions: true,
-          },
-        },
-      },
+      include: this.INVOICE_INCLUDE,
     });
 
-    if (!invoice) {
-      return null;
-    }
-
-    return new InvoiceEntity({
-      ...invoice,
-      invoiceItems: invoice.invoiceItems
-        ? invoice.invoiceItems.map((item: any) => new InvoiceItemEntity(item))
-        : [],
-      chatHistory: invoice.chatHistory
-        ? new ChatEntity({ ...invoice.chatHistory })
-        : undefined,
-    });
+    return invoice ? this.mapInvoiceToEntity(invoice) : null;
   }
 
-  async deleteInvoice(id: string): Promise<void> {
-    await this.prisma.invoice.delete({
+  async deleteInvoice(
+    id: string,
+    tx?: Prisma.TransactionClient,
+  ): Promise<void> {
+    await (tx || this.prisma).invoice.delete({
       where: { id },
     });
   }
 
-  async findAllInvoices(): Promise<InvoiceEntity[]> {
-    const invoices = await this.prisma.invoice.findMany({
-      include: {
-        invoiceItems: true,
-        chatHistory: true,
-      },
+  async findAllInvoices(
+    tx?: Prisma.TransactionClient,
+  ): Promise<InvoiceEntity[]> {
+    const invoices = await (tx || this.prisma).invoice.findMany({
+      include: this.INVOICE_INCLUDE,
     });
 
-    return invoices.map((invoice: any) => 
-      new InvoiceEntity({
-        ...invoice,
-        invoiceItems: invoice.invoiceItems
-          ? invoice.invoiceItems.map((item: any) => new InvoiceItemEntity(item))
-          : [],
-        chatHistory: invoice.chatHistory
-          ? new ChatEntity({ ...invoice.chatHistory })
-          : undefined,
-      })
-    );
+    return invoices.map((invoice) => this.mapInvoiceToEntity(invoice));
   }
 
-  async findInvoicesByUserId(userId: string): Promise<InvoiceEntity[]> {
-    const invoices = await this.prisma.invoice.findMany({
+  async findInvoicesByUserId(
+    userId: string,
+    tx?: Prisma.TransactionClient,
+  ): Promise<InvoiceEntity[]> {
+    const invoices = await (tx || this.prisma).invoice.findMany({
       where: { userId },
+      include: this.INVOICE_INCLUDE,
     });
 
-    return invoices.map((invoice) => new InvoiceEntity(invoice));
+    return invoices.map((invoice) => this.mapInvoiceToEntity(invoice));
   }
 
-  async createChatHistory(invoiceId: string): Promise<ChatEntity> {
-    const newChat = await this.prisma.chat.create({
-      data: {
-        invoiceId,
-      },
-    });
-
-    return new ChatEntity({
-      ...newChat,
-    });
-  }
-
-  async getChatHistoryByInvoiceId(
-    invoiceId: string,
-  ): Promise<ChatEntity | null> {
-    const chat = await this.prisma.chat.findUnique({
-      where: { invoiceId },
-      include: {
-        chatInteractions: true,
-      },
-    });
-
-    if (!chat) {
-      return null;
-    }
-
-    return new ChatEntity({
-      ...chat,
-    });
-  }
-
-  async createChatInteraction(
-    chatId: string,
-    role: 'USER' | 'ASSISTANT',
-    content: string,
-  ): Promise<ChatInteractionEntity> {
-    return await this.prisma.chatInteraction.create({
-      data: {
-        chatId: chatId,
-        role,
-        content,
-      },
+  private mapInvoiceToEntity(prismaInvoice: any): InvoiceEntity {
+    return new InvoiceEntity({
+      ...prismaInvoice,
+      invoiceItems: prismaInvoice.invoiceItems?.map(
+        (i: InvoiceItemEntity) => new InvoiceItemEntity(i),
+      ),
+      chatHistory: prismaInvoice.chatHistory
+        ? new ChatEntity({
+            ...prismaInvoice.chatHistory,
+            chatInteractions:
+              prismaInvoice.chatHistory.chatInteractions?.map(
+                (c: ChatInteractionEntity) => c,
+              ) ?? [],
+          })
+        : null,
     });
   }
 }

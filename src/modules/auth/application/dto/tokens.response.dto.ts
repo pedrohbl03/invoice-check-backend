@@ -1,6 +1,6 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { Expose, Type } from "class-transformer";
-import { IsNotEmpty, IsString } from "class-validator";
+import { ApiProperty } from '@nestjs/swagger';
+import { Expose, Type } from 'class-transformer';
+import { IsNotEmpty, IsString } from 'class-validator';
 
 export class TokensResponseDto {
   @ApiProperty({
@@ -34,7 +34,7 @@ export class RegisterTokensResponseDto {
   @Expose()
   @Type(() => TokensResponseDto)
   accessToken: TokensResponseDto;
-  
+
   @ApiProperty({
     description: 'The refresh token',
     type: TokensResponseDto,

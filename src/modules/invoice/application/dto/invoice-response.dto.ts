@@ -9,12 +9,6 @@ export class InvoiceItemResponseDto {
   @ApiProperty() @Expose() itemPrice: number;
   @ApiProperty() @Expose() itemTotal: number;
 
-  @Exclude() createdAt?: Date;
-  @Exclude() updatedAt?: Date;
-  @Exclude() invoiceId?: string;
-  @Exclude() id?: number;
-
-
   constructor(partial: Partial<InvoiceItemResponseDto>) {
     Object.assign(this, partial);
   }
@@ -43,7 +37,6 @@ export class InvoiceResponseDto {
   @Expose()
   @Type(() => InvoiceChatResponseDto)
   chatHistory: InvoiceChatResponseDto;
-
 
   constructor(partial: Partial<InvoiceResponseDto>) {
     Object.assign(this, partial);

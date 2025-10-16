@@ -1,4 +1,8 @@
-export const formatCDNUrl = (cdnUrl: string, bucketName: string, url: string): string => {
+export const formatCDNUrl = (
+  cdnUrl: string,
+  bucketName: string,
+  url: string,
+): string => {
   return `${cdnUrl}/${bucketName}/${url}`;
 };
 

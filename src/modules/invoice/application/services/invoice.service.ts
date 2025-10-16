@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { StorageService } from '../../../../database/storage/storage.service';
 import { InvoiceRepository } from '../../infrastructure/repositories/invoice.repository';
-import { InvoiceEntity } from '../../domain';
+import { ChatInteractionEntity, InvoiceEntity } from '../../domain';
 import { EnumInvoiceStatus } from '../../../../../generated/prisma';
 import {
   formatCDNUrl,
@@ -16,7 +16,6 @@ import {
   InvoiceProcessingError,
   InvoiceValidationError,
 } from '../../invoice.error';
-import { StorageUploadError } from '../../../../database/storage/storage.error';
 import { PdfService } from './pdf.service';
 import { ConfigService } from '@nestjs/config';
 import { InvoiceChatResponseDto, InvoiceResponseDto } from '../dto';
@@ -24,16 +23,21 @@ import { InvoiceMapper } from '../../infrastructure/mappers/invoice.mapper';
 import { ChatMapper } from '../../infrastructure/mappers/chat.mapper';
 import { InvoiceChatMessageResponseDto } from '../dto/invoice-chat-message-responde.dto';
 import { ChatMessageMapper } from '../../infrastructure/mappers/chat-message.mapper';
+import { ChatRepository } from '../../infrastructure/repositories/chat.repository';
+import { PrismaService } from '../../../../database';
+import { StorageUploadError } from '@/database/storage/storage.error';
 
 @Injectable()
 export class InvoiceService {
   constructor(
+    private readonly prisma: PrismaService,
     private readonly invoiceRepository: InvoiceRepository,
+    private readonly chatRepository: ChatRepository,
     private readonly openaiService: OpenAIService,
     private readonly storageService: StorageService,
     private readonly pdfService: PdfService,
     private readonly configService: ConfigService,
-  ) { }
+  ) {}
 
   async createInvoice(
     file: Express.Multer.File,
@@ -65,7 +69,7 @@ export class InvoiceService {
       .catch(async (error) => {
         await this.invoiceRepository.deleteInvoice(invoice.id);
         console.error(invoice.id, error);
-        throw new StorageUploadError();
+        throw new StorageUploadError(error.message);
       });
 
     const invoiceUrl = formatCDNUrl(
@@ -130,8 +134,7 @@ export class InvoiceService {
       throw new InvoiceNotFoundError('Invoice not found');
     }
 
-    const chatHistory =
-      await this.invoiceRepository.getChatHistoryByInvoiceId(id);
+    const chatHistory = await this.chatRepository.findChatByInvoiceId(id);
 
     if (!chatHistory) {
       throw new InteractionNotFoundError('Chat history not found');
@@ -140,45 +143,59 @@ export class InvoiceService {
     return ChatMapper.toResponse(chatHistory);
   }
 
-  async postChatMessage(id: string, message: string): Promise<InvoiceChatMessageResponseDto> {
-    const invoice = await this.invoiceRepository.findInvoiceById(id);
+  async postChatMessage(
+    id: string,
+    message: string,
+  ): Promise<InvoiceChatMessageResponseDto> {
+    return this.prisma.$transaction(
+      async (tx) => {
+        const invoice = await this.invoiceRepository.findInvoiceById(id, tx);
 
-    if (!invoice) {
-      throw new InvoiceNotFoundError('Invoice not found');
-    }
+        if (!invoice) {
+          throw new InvoiceNotFoundError('Invoice not found');
+        }
 
-    if (invoice.invoiceStatus !== EnumInvoiceStatus.ANALYZED) {
-      throw new InvoiceValidationError(
-        'Invoice must be analyzed before chatting',
-      );
-    }
+        if (invoice.invoiceStatus !== EnumInvoiceStatus.ANALYZED) {
+          throw new InvoiceValidationError(
+            'Invoice must be analyzed before chatting',
+          );
+        }
 
-    let history = await this.invoiceRepository.getChatHistoryByInvoiceId(id);
+        let history = await this.chatRepository.findChatByInvoiceId(id, tx);
 
-    if (!history) {
-      history = await this.invoiceRepository.createChatHistory(id);
-    }
+        if (!history) {
+          history = await this.chatRepository.createChat(id, tx);
+        }
 
-    await this.invoiceRepository.createChatInteraction(
-      history.id,
-      'USER',
-      message,
+        await this.chatRepository.appendChatInteraction(
+          history.id,
+          new ChatInteractionEntity({
+            role: 'USER',
+            content: message,
+          }),
+        );
+
+        const chatResponse = await this.openaiService.sendMessage(
+          invoice,
+          history,
+          message,
+        );
+
+        const registredResponse =
+          await this.chatRepository.appendChatInteraction(
+            history.id,
+            new ChatInteractionEntity({
+              role: 'ASSISTANT',
+              content: chatResponse,
+            }),
+          );
+
+        return ChatMessageMapper.toResponse(registredResponse);
+      },
+      {
+        timeout: 30000,
+      },
     );
-
-    const chatResponse = await this.openaiService.sendMessage(
-      invoice,
-      history,
-      message,
-    );
-
-    const registredResponse =
-      await this.invoiceRepository.createChatInteraction(
-        history.id,
-        'ASSISTANT',
-        chatResponse,
-      );
-
-    return ChatMessageMapper.toResponse(registredResponse);
   }
 
   private async processInvoiceAsync(
@@ -205,7 +222,7 @@ export class InvoiceService {
       throw new InvoiceValidationError('Failed to update invoice');
     }
 
-      return InvoiceMapper.toResponse(updatedInvoice);
+    return InvoiceMapper.toResponse(updatedInvoice);
   }
 
   async getCompilatedInvoicePdf(id: string): Promise<{ url: string }> {
@@ -221,7 +238,9 @@ export class InvoiceService {
       );
     }
 
-    const pdfBuffer = await this.pdfService.generatePdfByInvoice(InvoiceMapper.toResponse(invoice));
+    const pdfBuffer = await this.pdfService.generatePdfByInvoice(
+      InvoiceMapper.toResponse(invoice),
+    );
 
     await this.storageService.uploadFile(
       this.configService.get<string>('r2.bucketName', {

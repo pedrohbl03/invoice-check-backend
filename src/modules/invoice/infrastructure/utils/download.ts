@@ -2,6 +2,7 @@ import fs from 'fs';
 import axios from 'axios';
 
 const download = (url, destination) =>
+  // eslint-disable-next-line no-async-promise-executor
   new Promise(async (resolve, reject) => {
     const file = fs.createWriteStream(destination);
 
@@ -17,11 +18,12 @@ const download = (url, destination) =>
       });
     });
 
-    file.on('error', async (error) => {
+    file.on('error', (error) => {
       fs.unlink(destination, (e) => {
         console.error(e, e?.message);
       });
 
+      // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
       reject(error.message);
     });
   });

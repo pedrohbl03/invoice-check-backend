@@ -4,10 +4,12 @@ import { RegisterTokensResponseDto } from './tokens.response.dto';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class RegisterResponseDto {
-  @ApiProperty() @Expose()
+  @ApiProperty()
+  @Expose()
   @Type(() => UserResponseDto)
   user: UserResponseDto;
-  @ApiProperty() @Expose()
+  @ApiProperty()
+  @Expose()
   @Type(() => RegisterTokensResponseDto)
   tokens: RegisterTokensResponseDto;
 
