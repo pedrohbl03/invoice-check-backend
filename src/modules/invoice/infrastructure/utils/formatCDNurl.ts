@@ -1,9 +1,5 @@
-import { envConfig } from '../../../../config';
-
-const r2Config = envConfig().r2;
-
-export const formatCDNUrl = (url: string): string => {
-  return `${r2Config.cdnUrl}/${r2Config.bucketName}/${url}`;
+export const formatCDNUrl = (cdnUrl: string, bucketName: string, url: string): string => {
+  return `${cdnUrl}/${bucketName}/${url}`;
 };
 
 export const generateInvoiceKey = (

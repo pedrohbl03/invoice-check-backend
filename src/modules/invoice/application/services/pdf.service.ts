@@ -6,12 +6,13 @@ import { InvoiceProcessingError } from '../../invoice.error';
 import { getFileNameByUrl } from '../../infrastructure/utils/files';
 import fs from 'fs';
 import { join } from 'path';
+import { InvoiceResponseDto } from '../dto';
 
 @Injectable()
 export class PdfService {
   constructor() {}
 
-  async generatePdfByInvoice(invoice: InvoiceEntity): Promise<Buffer> {
+  async generatePdfByInvoice(invoice: InvoiceResponseDto): Promise<Buffer> {
     if (
       !invoice ||
       !invoice.invoiceUrl ||
@@ -97,6 +98,7 @@ export class PdfService {
       }
 
       if (
+        chatHistory &&
         chatHistory.chatInteractions &&
         chatHistory.chatInteractions.length > 0
       ) {
@@ -104,7 +106,7 @@ export class PdfService {
         doc.fontSize(20).text('Chat History', { align: 'center' });
         doc.moveDown();
 
-        invoice.chatHistory.chatInteractions.forEach((chat) => {
+        chatHistory.chatInteractions.forEach((chat) => {
           doc.fontSize(14).text(`${chat.role}: ${chat.content} \n`, {
             linebreak: true,
             align: 'left',

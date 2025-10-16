@@ -1,23 +1,18 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { EnumRole } from '../../../../../generated/prisma';
-import { UserEntity } from '../../domain/entities/user.entity';
+import { Exclude, Expose } from 'class-transformer';
 
 export class UserResponseDto {
-  @ApiProperty() id: string;
-  @ApiProperty() email: string;
-  @ApiProperty() name: string;
-  @ApiProperty({ enum: EnumRole }) role: EnumRole;
-  @ApiProperty() createdAt: Date;
-  @ApiProperty() updatedAt: Date;
+  @ApiProperty() @Expose() id: string;
+  @ApiProperty() @Expose() email: string;
+  @ApiProperty() @Expose() name: string;
+  @ApiProperty({ enum: EnumRole }) @Expose() role: EnumRole;
 
-  static fromEntity(entity: UserEntity): UserResponseDto {
-    const dto = new UserResponseDto();
-    dto.id = entity.id;
-    dto.email = entity.email;
-    dto.name = entity.name;
-    dto.role = entity.role;
-    dto.createdAt = entity.createdAt;
-    dto.updatedAt = entity.updatedAt;
-    return dto;
+  @Exclude() password?: string;
+  @Exclude() createdAt?: Date;
+  @Exclude() updatedAt?: Date;
+
+  constructor(partial: Partial<UserResponseDto>) {
+    Object.assign(this, partial);
   }
 }

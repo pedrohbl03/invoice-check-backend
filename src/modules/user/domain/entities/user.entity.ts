@@ -22,7 +22,7 @@ export class UserEntity {
   createdAt: Date;
   updatedAt: Date;
 
-  constructor(props: Partial<UserProps>) {
+  constructor(props: Partial<UserEntity>) {
     Object.assign(this, props);
   }
 }

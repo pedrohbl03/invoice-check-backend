@@ -3,7 +3,7 @@ import { UserEntity } from '../../domain';
 
 export class UserMapper {
   static toResponse(entity: UserEntity): UserResponseDto {
-    return UserResponseDto.fromEntity(entity);
+    return new UserResponseDto(entity);
   }
 
   static toResponseMany(entities: UserEntity[]): UserResponseDto[] {

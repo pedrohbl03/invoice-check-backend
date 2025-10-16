@@ -2,9 +2,10 @@ import { PrismaService } from '../../../../database';
 import { Injectable } from '@nestjs/common';
 import { TokensEntity } from '../../domain/entities/tokens.entity';
 import { EnumTokenType } from 'generated/prisma';
+import { TokenRepositoryInterface } from '../../domain/repositories/token.repository.interface';
 
 @Injectable()
-export class TokensRepository {
+export class TokensRepository implements TokenRepositoryInterface {
   constructor(private readonly prisma: PrismaService) {}
 
   async deleteTokensByUserId(userId: string): Promise<void> {

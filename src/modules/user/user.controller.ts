@@ -6,14 +6,16 @@ import {
   Param,
   Post,
   Put,
+  UseGuards,
 } from '@nestjs/common';
 import { UserService } from './application/services';
 import { CreateUserDto } from './application';
-import { UserEntity } from './domain';
 import { ApiBody, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { UpdateUserDto } from './application/dto/update-user.dto';
 import { UserResponseDto } from './application/dto/user-response.dto';
+import { AuthGuard } from '../auth/auth.guard';
 
+@UseGuards(AuthGuard)
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
@@ -21,7 +23,7 @@ export class UserController {
   @Post()
   @ApiCreatedResponse({
     description: 'The user has been successfully created.',
-    type: UserEntity,
+    type: UserResponseDto,
   })
   @ApiBody({
     description: 'The user to create',
@@ -47,7 +49,7 @@ export class UserController {
 
   @ApiOkResponse({
     description: 'The user has been successfully updated.',
-    type: UserEntity,
+    type: UserResponseDto,
   })
   @Delete(':id')
   async deleteUser(@Param('id') id: string): Promise<void> {
@@ -57,15 +59,15 @@ export class UserController {
   @Get(':id')
   @ApiOkResponse({
     description: 'The user has been successfully found.',
-    type: UserEntity,
+    type: UserResponseDto,
   })
-  async getUser(@Param('id') id: string): Promise<UserResponseDto> {
+  async getUser(@Param('id') id: string): Promise<UserResponseDto | null> {
     return this.userService.findUserById(id);
   }
 
   @ApiOkResponse({
     description: 'The users have been successfully found.',
-    type: [UserEntity],
+    type: [UserResponseDto],
   })
   @Get()
   async getUsers(): Promise<UserResponseDto[]> {

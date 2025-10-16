@@ -12,65 +12,96 @@ import {
 } from '@nestjs/common';
 import { InvoiceService } from './application/services';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { InvoiceEntity } from './domain/entities/invoice.entity';
 import { AuthGuard } from '../auth/auth.guard';
-import { ChatEntity } from './domain/entities/invoice-chat.entity';
+import { InvoiceChatResponseDto, InvoiceResponseDto } from './application';
+import { InvoiceChatMessageResponseDto } from './application/dto/invoice-chat-message-responde.dto';
+import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 
+@UseGuards(AuthGuard)
 @Controller('invoices')
 export class InvoiceController {
   constructor(private readonly invoiceService: InvoiceService) {}
 
-  @UseGuards(AuthGuard)
   @Post()
   @UseInterceptors(FileInterceptor('file'))
+  @ApiCreatedResponse({
+    description: 'The invoice has been successfully created.',
+    type: InvoiceResponseDto,
+  })
+
   uploadInvoice(
     @UploadedFile() file: Express.Multer.File,
     @Req() request: Request,
-  ): Promise<InvoiceEntity> {
+  ): Promise<InvoiceResponseDto> {
     return this.invoiceService.createInvoice(file, request['userId']);
   }
 
-  @UseGuards(AuthGuard)
   @Get()
-  findAllInvoices(): Promise<InvoiceEntity[]> {
+  @ApiOkResponse({
+    description: 'The invoices have been successfully fetched.',
+    type: [InvoiceResponseDto],
+  })
+  findAllInvoices(): Promise<InvoiceResponseDto[]> {
     return this.invoiceService.findAllInvoices();
   }
 
-  @UseGuards(AuthGuard)
   @Get(':id')
-  findInvoiceById(@Param('id') id: string): Promise<InvoiceEntity | null> {
+  @ApiOkResponse({
+    description: 'The invoice has been successfully fetched.',
+    type: InvoiceResponseDto,
+  })
+  findInvoiceById(@Param('id') id: string): Promise<InvoiceResponseDto | null> {
     return this.invoiceService.findInvoiceById(id);
   }
 
-  @UseGuards(AuthGuard)
   @Get('/user/:id')
-  findInvoicesByUserId(@Param('id') userId: string): Promise<InvoiceEntity[]> {
+  @ApiOkResponse({
+    description: 'The invoices have been successfully fetched.',
+    type: [InvoiceResponseDto],
+  })
+  findInvoicesByUserId(@Param('id') userId: string): Promise<InvoiceResponseDto[]> {
     return this.invoiceService.findInvoicesByUserId(userId);
   }
 
-  @UseGuards(AuthGuard)
   @Delete(':id')
+  @ApiOkResponse({
+    description: 'The invoice has been successfully deleted.',
+  })
   deleteInvoice(@Param('id') id: string): Promise<void> {
     return this.invoiceService.deleteInvoice(id);
   }
 
-  @UseGuards(AuthGuard)
   @Get(':id/chat')
-  getChatHistory(@Param('id') id: string): Promise<ChatEntity | null> {
+  @ApiOkResponse({
+    description: 'The chat history has been successfully fetched.',
+    type: InvoiceChatResponseDto,
+  })
+  getChatHistory(@Param('id') id: string): Promise<InvoiceChatResponseDto | null> {
     return this.invoiceService.getChatHistoryByInvoiceId(id);
   }
 
-  @UseGuards(AuthGuard)
   @Post(':id/chat')
+  @ApiCreatedResponse({
+    description: 'The chat message has been successfully created.',
+    type: InvoiceChatMessageResponseDto,
+  })
   postChatMessage(
     @Param('id') id: string,
     @Body('message') message: string,
-  ): Promise<void> {
+  ): Promise<InvoiceChatMessageResponseDto> {
     return this.invoiceService.postChatMessage(id, message);
   }
 
-  @UseGuards(AuthGuard)
   @Get(':id/pdf')
+  @ApiOkResponse({
+    description: 'The invoice PDF has been successfully fetched.',
+    schema: {
+      type: 'object',
+      properties: {
+        url: { type: 'string' },
+      },
+    },
+  })
   async getInvoicePdf(@Param('id') id: string): Promise<{ url: string }> {
     return await this.invoiceService.getCompilatedInvoicePdf(id);
   }

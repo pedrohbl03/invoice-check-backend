@@ -4,9 +4,10 @@ import { Injectable } from '@nestjs/common';
 import { ChatEntity } from '../../domain/entities/invoice-chat.entity';
 import { InvoiceItemEntity } from '../../domain/entities/invoice-item.entity';
 import { ChatInteractionEntity } from '../../domain/entities/chat-interaction.entity';
+import { IInvoiceRepository } from '../../domain/repositories/invoice.repository.interface';
 
 @Injectable()
-export class InvoiceRepository {
+export class InvoiceRepository implements IInvoiceRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async createInvoice(invoice: InvoiceEntity): Promise<InvoiceEntity> {
@@ -143,9 +144,24 @@ export class InvoiceRepository {
   }
 
   async findAllInvoices(): Promise<InvoiceEntity[]> {
-    const invoices = await this.prisma.invoice.findMany();
+    const invoices = await this.prisma.invoice.findMany({
+      include: {
+        invoiceItems: true,
+        chatHistory: true,
+      },
+    });
 
-    return invoices.map((invoice) => new InvoiceEntity(invoice));
+    return invoices.map((invoice: any) => 
+      new InvoiceEntity({
+        ...invoice,
+        invoiceItems: invoice.invoiceItems
+          ? invoice.invoiceItems.map((item: any) => new InvoiceItemEntity(item))
+          : [],
+        chatHistory: invoice.chatHistory
+          ? new ChatEntity({ ...invoice.chatHistory })
+          : undefined,
+      })
+    );
   }
 
   async findInvoicesByUserId(userId: string): Promise<InvoiceEntity[]> {

@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { StorageService } from '../../../../database/storage/storage.service';
 import { InvoiceRepository } from '../../infrastructure/repositories/invoice.repository';
 import { InvoiceEntity } from '../../domain';
-import { envConfig } from '../../../../config';
 import { EnumInvoiceStatus } from '../../../../../generated/prisma';
 import {
   formatCDNUrl,
@@ -18,8 +17,13 @@ import {
   InvoiceValidationError,
 } from '../../invoice.error';
 import { StorageUploadError } from '../../../../database/storage/storage.error';
-import { ChatEntity } from '../../domain/entities/invoice-chat.entity';
 import { PdfService } from './pdf.service';
+import { ConfigService } from '@nestjs/config';
+import { InvoiceChatResponseDto, InvoiceResponseDto } from '../dto';
+import { InvoiceMapper } from '../../infrastructure/mappers/invoice.mapper';
+import { ChatMapper } from '../../infrastructure/mappers/chat.mapper';
+import { InvoiceChatMessageResponseDto } from '../dto/invoice-chat-message-responde.dto';
+import { ChatMessageMapper } from '../../infrastructure/mappers/chat-message.mapper';
 
 @Injectable()
 export class InvoiceService {
@@ -28,12 +32,13 @@ export class InvoiceService {
     private readonly openaiService: OpenAIService,
     private readonly storageService: StorageService,
     private readonly pdfService: PdfService,
-  ) {}
+    private readonly configService: ConfigService,
+  ) { }
 
   async createInvoice(
     file: Express.Multer.File,
     userId: string,
-  ): Promise<InvoiceEntity> {
+  ): Promise<InvoiceResponseDto> {
     const invoice = await this.invoiceRepository.createInvoice(
       new InvoiceEntity({
         userId,
@@ -50,7 +55,9 @@ export class InvoiceService {
 
     await this.storageService
       .uploadFile(
-        envConfig().r2.bucketName,
+        this.configService.get<string>('r2.bucketName', {
+          infer: true,
+        })!,
         invoiceKey,
         file.buffer,
         file.mimetype,
@@ -61,10 +68,20 @@ export class InvoiceService {
         throw new StorageUploadError();
       });
 
+    const invoiceUrl = formatCDNUrl(
+      this.configService.get<string>('r2.cdnUrl', {
+        infer: true,
+      })!,
+      this.configService.get<string>('r2.bucketName', {
+        infer: true,
+      })!,
+      invoiceKey,
+    );
+
     const invoiceUpdated = await this.invoiceRepository.updateInvoice(
       invoice.id,
       new InvoiceEntity({
-        invoiceUrl: formatCDNUrl(invoiceKey),
+        invoiceUrl,
       }),
     );
 
@@ -79,47 +96,55 @@ export class InvoiceService {
       throw new InvoiceProcessingError();
     });
 
-    return new InvoiceEntity(invoiceUpdated);
+    return InvoiceMapper.toResponse(invoiceUpdated);
   }
 
-  async findAllInvoices(): Promise<InvoiceEntity[]> {
-    return await this.invoiceRepository.findAllInvoices();
+  async findAllInvoices(): Promise<InvoiceResponseDto[]> {
+    const invoices = await this.invoiceRepository.findAllInvoices();
+    return InvoiceMapper.toResponseMany(invoices);
   }
 
-  async findInvoicesByUserId(userId: string): Promise<InvoiceEntity[]> {
-    return await this.invoiceRepository.findInvoicesByUserId(userId);
+  async findInvoicesByUserId(userId: string): Promise<InvoiceResponseDto[]> {
+    const invoices = await this.invoiceRepository.findInvoicesByUserId(userId);
+    return InvoiceMapper.toResponseMany(invoices);
   }
 
-  async findInvoiceById(id: string): Promise<InvoiceEntity | null> {
-    return await this.invoiceRepository.findInvoiceById(id);
+  async findInvoiceById(id: string): Promise<InvoiceResponseDto | null> {
+    const invoice = await this.invoiceRepository.findInvoiceById(id);
+
+    if (!invoice) {
+      throw new InvoiceNotFoundError('Invoice not found');
+    }
+
+    return InvoiceMapper.toResponse(invoice);
   }
 
   async deleteInvoice(id: string): Promise<void> {
     await this.invoiceRepository.deleteInvoice(id);
   }
 
-  async getChatHistoryByInvoiceId(id: string): Promise<ChatEntity | null> {
+  async getChatHistoryByInvoiceId(id: string): Promise<InvoiceChatResponseDto> {
     const invoice = await this.invoiceRepository.findInvoiceById(id);
 
     if (!invoice) {
-      throw new InvoiceNotFoundError();
+      throw new InvoiceNotFoundError('Invoice not found');
     }
 
     const chatHistory =
       await this.invoiceRepository.getChatHistoryByInvoiceId(id);
 
     if (!chatHistory) {
-      throw new InteractionNotFoundError();
+      throw new InteractionNotFoundError('Chat history not found');
     }
 
-    return chatHistory;
+    return ChatMapper.toResponse(chatHistory);
   }
 
-  async postChatMessage(id: string, message: string): Promise<any> {
+  async postChatMessage(id: string, message: string): Promise<InvoiceChatMessageResponseDto> {
     const invoice = await this.invoiceRepository.findInvoiceById(id);
 
     if (!invoice) {
-      throw new InvoiceNotFoundError();
+      throw new InvoiceNotFoundError('Invoice not found');
     }
 
     if (invoice.invoiceStatus !== EnumInvoiceStatus.ANALYZED) {
@@ -153,13 +178,13 @@ export class InvoiceService {
         chatResponse,
       );
 
-    return registredResponse;
+    return ChatMessageMapper.toResponse(registredResponse);
   }
 
   private async processInvoiceAsync(
     invoice: InvoiceEntity,
     file: Express.Multer.File,
-  ): Promise<InvoiceEntity> {
+  ): Promise<InvoiceResponseDto> {
     const analyzedInvoice =
       await this.openaiService.analyzeInvoiceByBuffer(file);
 
@@ -177,17 +202,17 @@ export class InvoiceService {
       );
 
     if (!updatedInvoice) {
-      throw new Error('Failed to update invoice');
+      throw new InvoiceValidationError('Failed to update invoice');
     }
 
-    return new InvoiceEntity(updatedInvoice);
+      return InvoiceMapper.toResponse(updatedInvoice);
   }
 
   async getCompilatedInvoicePdf(id: string): Promise<{ url: string }> {
     const invoice = await this.invoiceRepository.findInvoiceById(id);
 
     if (!invoice) {
-      throw new InvoiceNotFoundError();
+      throw new InvoiceNotFoundError('Invoice not found');
     }
 
     if (invoice.invoiceStatus !== EnumInvoiceStatus.ANALYZED) {
@@ -196,16 +221,24 @@ export class InvoiceService {
       );
     }
 
-    const pdfBuffer = await this.pdfService.generatePdfByInvoice(invoice);
+    const pdfBuffer = await this.pdfService.generatePdfByInvoice(InvoiceMapper.toResponse(invoice));
 
     await this.storageService.uploadFile(
-      envConfig().r2.bucketName,
+      this.configService.get<string>('r2.bucketName', {
+        infer: true,
+      })!,
       generateInvoiceKey(invoice.userId, invoice.id, 'pdf'),
       pdfBuffer,
       'application/pdf',
     );
 
     const pdfUrl = formatCDNUrl(
+      this.configService.get<string>('r2.cdnUrl', {
+        infer: true,
+      })!,
+      this.configService.get<string>('r2.bucketName', {
+        infer: true,
+      })!,
       generateInvoiceKey(invoice.userId, invoice.id, 'pdf'),
     );
 

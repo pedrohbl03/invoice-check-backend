@@ -5,13 +5,12 @@ import { UserModule } from '../user';
 import { TokensService } from './application/services/tokens.service';
 import { TokensRepository } from './infrastructure/repositories/tokens.repository';
 import { JwtModule } from '@nestjs/jwt';
-import { envConfig } from '../../config';
 
 @Module({
   imports: [
     UserModule,
     JwtModule.register({
-      secret: envConfig().jwt.secret,
+      secret: process.env.JWT_SECRET,
       global: true,
     }),
   ],

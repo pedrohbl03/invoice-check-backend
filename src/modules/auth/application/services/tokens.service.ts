@@ -5,7 +5,8 @@ import { TokensEntity } from '../../domain/entities/tokens.entity';
 import { TokensRepository } from '../../infrastructure/repositories/tokens.repository';
 import { SaveTokenDto } from '../dto/save-token.dto';
 import { JwtService } from '@nestjs/jwt';
-
+import { TokensResponseDto } from '../dto/tokens.response.dto';
+import { TokensMapper } from '../../infrastructure/mappers/tokens.mapper';
 @Injectable()
 export class TokensService {
   constructor(
@@ -17,20 +18,22 @@ export class TokensService {
     await this.tokensRepository.deleteTokensByUserId(userId);
   }
 
-  async verifyToken(token: string): Promise<any> {
+  async verifyToken(token: string): Promise<TokensResponseDto> {
     return await this.jwtService.verifyAsync(token);
   }
 
-  async saveToken(saveTokenDto: SaveTokenDto): Promise<TokensEntity> {
+  async saveToken(saveTokenDto: SaveTokenDto): Promise<TokensResponseDto> {
     const token = this.generateToken(saveTokenDto.userId, saveTokenDto.type);
 
     if (!token) {
       throw new Error('Failed to generate token');
     }
 
-    return await this.tokensRepository.saveToken(
+    const savedToken = await this.tokensRepository.saveToken(
       new TokensEntity({ ...saveTokenDto, token }),
     );
+
+    return TokensMapper.toResponse(savedToken);
   }
 
   generateToken(userId: string, type: EnumTokenType): string {
