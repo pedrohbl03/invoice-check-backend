@@ -133,7 +133,6 @@ Após executar, a aplicação estará disponível em:
 
 - **API**: http://localhost:3000/api/v1
 - **Documentação Swagger**: http://localhost:3000/docs/swagger
-- **Health Check**: http://localhost:3000/api/v1/
 
 ---
 
