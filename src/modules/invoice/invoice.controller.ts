@@ -37,7 +37,7 @@ export class InvoiceController {
     @UploadedFile(new ParseFilePipe({
       validators: [
         new MaxFileSizeValidator({ maxSize: 10 * 1024 * 1024 }), // 10MB
-        new FileTypeValidator({ fileType: 'image/(png|jpg|jpeg)' }),
+        new FileTypeValidator({ fileType: /^image\/(png|jpg|jpeg)$/ }),
       ],
     })) file: Express.Multer.File,
     @Req() request: Request,
