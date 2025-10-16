@@ -113,7 +113,11 @@ export class InvoiceRepository {
             itemTotal: true,
           },
         },
-        chatHistory: true,
+        chatHistory: {
+          include: {
+            chatInteractions: true,
+          },
+        },
       },
     });
 
