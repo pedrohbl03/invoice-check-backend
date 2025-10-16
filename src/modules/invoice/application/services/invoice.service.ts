@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { StorageService } from '@/database/storage/storage.service';
+import { StorageService } from '../../../../database/storage/storage.service';
 import { InvoiceRepository } from '../../infrastructure/repositories/invoice.repository';
 import { InvoiceEntity } from '../../domain';
 import { envConfig } from '@/config';
@@ -14,7 +14,7 @@ import {
   InvoiceProcessingError,
   InvoiceValidationError,
 } from '../../invoice.error';
-import { StorageUploadError } from '@/database/storage/storage.error';
+import { StorageUploadError } from '../../../..//database/storage/storage.error';
 import { ChatEntity } from '../../domain/entities/invoice-chat.entity';
 import { PdfService } from './pdf.service';
 
