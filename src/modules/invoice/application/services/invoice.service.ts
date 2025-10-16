@@ -3,7 +3,7 @@ import { StorageService } from '../../../../database/storage/storage.service';
 import { InvoiceRepository } from '../../infrastructure/repositories/invoice.repository';
 import { InvoiceEntity } from '../../domain';
 import { envConfig } from '@/config';
-import { EnumInvoiceStatus } from 'generated/prisma';
+import { EnumInvoiceStatus } from '../../../../../generated/prisma';
 import {
   formatCDNUrl,
   generateInvoiceKey,

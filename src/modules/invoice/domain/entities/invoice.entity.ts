@@ -1,5 +1,5 @@
 import { Transform } from 'class-transformer';
-import { EnumInvoiceStatus, Invoice } from 'generated/prisma';
+import { EnumInvoiceStatus, Invoice } from '../../../../../generated/prisma';
 import { InvoiceItemEntity } from './invoice-item.entity';
 import { ChatEntity } from './invoice-chat.entity';
 

@@ -1,4 +1,4 @@
-import { EnumTokenType, UserTokens } from 'generated/prisma';
+import { EnumTokenType, UserTokens } from '../../../../../generated/prisma';
 
 export class TokensEntity implements UserTokens {
   constructor(partial: Partial<TokensEntity>) {

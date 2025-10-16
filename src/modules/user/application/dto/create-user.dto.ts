@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
-import { EnumRole } from 'generated/prisma';
+import { EnumRole } from '../../../../../generated/prisma';
 
 export class CreateUserDto {
   @IsString()

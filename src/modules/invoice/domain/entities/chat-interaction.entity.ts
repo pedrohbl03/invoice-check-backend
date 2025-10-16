@@ -1,4 +1,7 @@
-import { EnumInteractionRole, ChatInteraction } from 'generated/prisma';
+import {
+  EnumInteractionRole,
+  ChatInteraction,
+} from '../../../../../generated/prisma';
 
 export class ChatInteractionEntity implements ChatInteraction {
   id: string;
