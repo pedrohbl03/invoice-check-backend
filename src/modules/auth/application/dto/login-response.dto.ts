@@ -1,4 +1,4 @@
-import { UserResponseDto } from '@/modules/user/application/dto/user-response.dto';
+import { UserResponseDto } from '../../../../modules/user/application/dto/user-response.dto';
 import { RegisterTokensResponseDto } from './tokens.response.dto';
 import { Expose, Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';

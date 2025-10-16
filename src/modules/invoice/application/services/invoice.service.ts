@@ -25,7 +25,7 @@ import { InvoiceChatMessageResponseDto } from '../dto/invoice-chat-message-respo
 import { ChatMessageMapper } from '../../infrastructure/mappers/chat-message.mapper';
 import { ChatRepository } from '../../infrastructure/repositories/chat.repository';
 import { PrismaService } from '../../../../database';
-import { StorageUploadError } from '@/database/storage/storage.error';
+import { StorageUploadError } from '../../../../database/storage/storage.error';
 
 @Injectable()
 export class InvoiceService {

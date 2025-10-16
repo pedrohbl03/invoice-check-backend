@@ -7,7 +7,7 @@ import {
 } from '../../domain';
 import { Injectable } from '@nestjs/common';
 import { IInvoiceRepository } from '../../domain/repositories/invoice.repository.interface';
-import { Prisma } from 'generated/prisma';
+import { Prisma } from '../../../../../generated/prisma';
 
 @Injectable()
 export class InvoiceRepository implements IInvoiceRepository {
@@ -47,7 +47,7 @@ export class InvoiceRepository implements IInvoiceRepository {
       include: this.INVOICE_INCLUDE,
     });
 
-    return this.mapInvoiceToEntity(createdInvoice);
+    return this.mapInvoiceToEntity(createdInvoice as InvoiceEntity);
   }
 
   async updateInvoice(
@@ -73,7 +73,7 @@ export class InvoiceRepository implements IInvoiceRepository {
       },
     });
 
-    return this.mapInvoiceToEntity(updatedInvoice);
+    return this.mapInvoiceToEntity(updatedInvoice as InvoiceEntity);
   }
 
   async updateInvoiceRelationships(
@@ -106,7 +106,7 @@ export class InvoiceRepository implements IInvoiceRepository {
       include: this.INVOICE_INCLUDE,
     });
 
-    return this.mapInvoiceToEntity(updatedInvoice);
+    return this.mapInvoiceToEntity(updatedInvoice as InvoiceEntity);
   }
 
   async findInvoiceById(
@@ -118,7 +118,7 @@ export class InvoiceRepository implements IInvoiceRepository {
       include: this.INVOICE_INCLUDE,
     });
 
-    return invoice ? this.mapInvoiceToEntity(invoice) : null;
+    return invoice ? this.mapInvoiceToEntity(invoice as InvoiceEntity) : null;
   }
 
   async deleteInvoice(
@@ -137,7 +137,7 @@ export class InvoiceRepository implements IInvoiceRepository {
       include: this.INVOICE_INCLUDE,
     });
 
-    return invoices.map((invoice) => this.mapInvoiceToEntity(invoice));
+    return invoices.map((invoice) => this.mapInvoiceToEntity(invoice as InvoiceEntity));
   }
 
   async findInvoicesByUserId(
@@ -149,16 +149,16 @@ export class InvoiceRepository implements IInvoiceRepository {
       include: this.INVOICE_INCLUDE,
     });
 
-    return invoices.map((invoice) => this.mapInvoiceToEntity(invoice));
+    return invoices.map((invoice) => this.mapInvoiceToEntity(invoice as InvoiceEntity));
   }
 
-  private mapInvoiceToEntity(prismaInvoice: any): InvoiceEntity {
+  private mapInvoiceToEntity(prismaInvoice: InvoiceEntity): InvoiceEntity {
     return new InvoiceEntity({
       ...prismaInvoice,
-      invoiceItems: prismaInvoice.invoiceItems?.map(
+      invoiceItems: prismaInvoice?.invoiceItems?.map(
         (i: InvoiceItemEntity) => new InvoiceItemEntity(i),
       ),
-      chatHistory: prismaInvoice.chatHistory
+      chatHistory: prismaInvoice?.chatHistory
         ? new ChatEntity({
             ...prismaInvoice.chatHistory,
             chatInteractions:

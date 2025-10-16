@@ -7,10 +7,8 @@ import { LoginRequestDto } from '../dto/login-request.dto';
 import { RegisterRequestDto } from '../dto/register.dto';
 import { EnumRole } from '../../../../../generated/prisma';
 import { TokensService } from './tokens.service';
-import { UserResponseDto } from '@/modules/user/application/dto/user-response.dto';
 import { LoginResponseDto } from '../dto/login-response.dto';
 import { LoginMapper } from '../../infrastructure/mappers/login.mapper';
-import { UserMapper } from '@/modules/user/infrastructure/mappers/user.mappers';
 import { RegisterResponseDto } from '../dto/register-response.dto';
 import { RegisterMapper } from '../../infrastructure/mappers/register.mapper';
 

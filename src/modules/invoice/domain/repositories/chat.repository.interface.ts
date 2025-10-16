@@ -1,4 +1,4 @@
-import { PrismaService } from '@/database';
+import { PrismaService } from '../../../../database';
 import { ChatEntity, ChatInteractionEntity } from '../entities';
 
 export interface IChatRepository {

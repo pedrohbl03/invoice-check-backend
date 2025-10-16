@@ -44,6 +44,13 @@ async function bootstrap() {
   const config = new DocumentBuilder()
     .setTitle('OCR Invoice Backend')
     .setDescription('The OCR Invoice Backend API documentation')
+    .addBearerAuth({
+      type: 'http',
+      scheme: 'bearer',
+      name: 'JWT',
+      description: 'Enter JWT token',
+      in: 'header',
+    })
     .setVersion('1.0')
     .build();
 

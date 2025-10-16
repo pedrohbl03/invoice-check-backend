@@ -1,4 +1,4 @@
-import { UserResponseDto } from '@/modules/user/application/dto/user-response.dto';
+import { UserResponseDto } from '../../../../modules/user/application/dto/user-response.dto';
 import { RegisterTokensResponseDto } from '../../application/dto/tokens.response.dto';
 import { RegisterResponseDto } from '../../application/dto/register-response.dto';
 

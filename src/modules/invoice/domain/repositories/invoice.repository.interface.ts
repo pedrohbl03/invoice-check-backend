@@ -1,5 +1,5 @@
 import { InvoiceEntity } from '../entities/invoice.entity';
-import { PrismaService } from '@/database';
+import { PrismaService } from '../../../../database';
 
 export interface IInvoiceRepository {
   createInvoice(

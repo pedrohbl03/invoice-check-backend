@@ -5,8 +5,9 @@ import { LoginRequestDto } from './application/dto/login-request.dto';
 import { AuthGuard } from './auth.guard';
 import { RegisterResponseDto } from './application/dto/register-response.dto';
 import { LoginResponseDto } from './application/dto/login-response.dto';
-import { ApiBody, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Authentication')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -39,6 +40,7 @@ export class AuthController {
     return this.authService.register(registerDto);
   }
 
+  @ApiBearerAuth()
   @Post('logout')
   @UseGuards(AuthGuard)
   @ApiOkResponse({

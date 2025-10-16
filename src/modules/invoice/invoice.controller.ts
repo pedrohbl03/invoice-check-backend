@@ -9,14 +9,19 @@ import {
   UseGuards,
   Req,
   Body,
+  ParseFilePipe,
+  MaxFileSizeValidator,
+  FileTypeValidator,
 } from '@nestjs/common';
 import { InvoiceService } from './application/services';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AuthGuard } from '../auth/auth.guard';
 import { InvoiceChatResponseDto, InvoiceResponseDto } from './application';
 import { InvoiceChatMessageResponseDto } from './application/dto/invoice-chat-message-responde.dto';
-import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 
+@ApiBearerAuth()
+@ApiTags('Invoices')
 @UseGuards(AuthGuard)
 @Controller('invoices')
 export class InvoiceController {
@@ -29,7 +34,12 @@ export class InvoiceController {
     type: InvoiceResponseDto,
   })
   uploadInvoice(
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile(new ParseFilePipe({
+      validators: [
+        new MaxFileSizeValidator({ maxSize: 10 * 1024 * 1024 }), // 10MB
+        new FileTypeValidator({ fileType: /(pdf|png|jpg|jpeg)$/ }),
+      ],
+    })) file: Express.Multer.File,
     @Req() request: Request,
   ): Promise<InvoiceResponseDto> {
     return this.invoiceService.createInvoice(file, request['userId']);

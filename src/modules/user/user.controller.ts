@@ -10,11 +10,13 @@ import {
 } from '@nestjs/common';
 import { UserService } from './application/services';
 import { CreateUserDto } from './application';
-import { ApiBody, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { UpdateUserDto } from './application/dto/update-user.dto';
 import { UserResponseDto } from './application/dto/user-response.dto';
 import { AuthGuard } from '../auth/auth.guard';
 
+@ApiBearerAuth()
+@ApiTags('Users')
 @UseGuards(AuthGuard)
 @Controller('users')
 export class UserController {
