@@ -54,7 +54,7 @@ async function bootstrap() {
   await app.listen(port);
 
   // Ensure temp directory exists
-  const path = './temp';
+  const path = '/tmp';
   if (!fs.existsSync(path)) {
     fs.mkdirSync(path);
   }

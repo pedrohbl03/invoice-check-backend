@@ -5,6 +5,7 @@ import download from '../../infrastructure/utils/download';
 import { InvoiceProcessingError } from '../../invoice.error';
 import { getFileNameByUrl } from '../../infrastructure/utils/files';
 import fs from 'fs';
+import { join } from 'path';
 
 @Injectable()
 export class PdfService {
@@ -21,14 +22,10 @@ export class PdfService {
       );
     }
 
-    const temporaryFilePath = `./temp/${getFileNameByUrl(
-      invoice.invoiceUrl,
-    )}`;
+    const tempDir = '/tmp';
+    const filePath = join(tempDir, getFileNameByUrl(invoice.invoiceUrl));
 
-    await download(
-      invoice.invoiceUrl,
-      temporaryFilePath,
-    ).catch((err) => {
+    await download(invoice.invoiceUrl, filePath).catch((err) => {
       console.error('Download error:', err);
       throw new InvoiceProcessingError(
         'Failed to download invoice image to server generate PDF.',
@@ -42,7 +39,7 @@ export class PdfService {
       doc.on('data', (chunk) => chunks.push(chunk));
       doc.on('end', () => {
         const result = Buffer.concat(chunks);
-        this.removeTempFile(temporaryFilePath);
+        this.removeTempFile(filePath);
         resolve(result);
       });
       // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
@@ -59,7 +56,7 @@ export class PdfService {
       }
 
       if (invoice.invoiceUrl) {
-        doc.image(temporaryFilePath, {
+        doc.image(filePath, {
           fit: [500, 400],
           align: 'center',
           valign: 'center',
