@@ -1,7 +1,7 @@
 import { envConfig } from 'src/config';
 
 export const formatCDNUrl = (url: string): string => {
-  return `${envConfig().r2.cdnUrl}/${url}`;
+  return `${envConfig().r2.cdnUrl}/${envConfig().r2.bucketName}/${url}`;
 };
 
 export const generateInvoiceKey = (
@@ -9,5 +9,5 @@ export const generateInvoiceKey = (
   invoiceId: string,
   extension: string,
 ): string => {
-  return `/users-invoices/${userId}/${invoiceId}.${extension}`;
+  return `${userId}/${invoiceId}.${extension}`;
 };

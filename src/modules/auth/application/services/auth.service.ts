@@ -1,4 +1,3 @@
-import * as bcrypt from 'bcrypt';
 import { Injectable } from '@nestjs/common';
 
 import { UserEntity } from '../../../user/domain/entities/user.entity';

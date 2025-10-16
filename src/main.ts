@@ -1,3 +1,4 @@
+import fs from 'fs';
 import { NestFactory, Reflector } from '@nestjs/core';
 import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
@@ -51,6 +52,12 @@ async function bootstrap() {
 
   const port = process.env.PORT ?? 3000;
   await app.listen(port);
+
+  // Ensure temp directory exists
+  const path = './temp';
+  if (!fs.existsSync(path)) {
+    fs.mkdirSync(path);
+  }
 
   console.log(`🚀 Application is running on: http://localhost:${port}/api/v1`);
 }

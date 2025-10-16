@@ -2,6 +2,8 @@ import { PrismaService } from 'src/database';
 import { InvoiceEntity } from '../../domain';
 import { Injectable } from '@nestjs/common';
 import { ChatEntity } from '../../domain/entities/invoice-chat.entity';
+import { InvoiceItemEntity } from '../../domain/entities/invoice-item.entity';
+import { ChatInteractionEntity } from '../../domain/entities/chat-interaction.entity';
 
 @Injectable()
 export class InvoiceRepository {
@@ -16,19 +18,15 @@ export class InvoiceRepository {
             createMany: { data: invoice.invoiceItems },
           },
         }),
-
-        // Create chat history if it not exists
-        ...(invoice.chatHistory && {
-          chatHistory: {
-            create: {
-              ...(invoice.chatHistory.chatInteractions && {
-                chatInteractions: {
-                  createMany: { data: invoice.chatHistory.chatInteractions },
-                },
-              }),
-            },
+        chatHistory: {
+          create: {
+            ...(invoice.chatHistory?.chatInteractions && {
+              chatInteractions: {
+                createMany: { data: invoice.chatHistory.chatInteractions },
+              },
+            }),
           },
-        }),
+        },
       },
       include: {
         invoiceItems: true,
@@ -106,13 +104,32 @@ export class InvoiceRepository {
   async findInvoiceById(id: string): Promise<InvoiceEntity | null> {
     const invoice = await this.prisma.invoice.findUnique({
       where: { id },
+      include: {
+        invoiceItems: {
+          select: {
+            itemName: true,
+            itemQuantity: true,
+            itemPrice: true,
+            itemTotal: true,
+          },
+        },
+        chatHistory: true,
+      },
     });
 
     if (!invoice) {
       return null;
     }
 
-    return new InvoiceEntity(invoice);
+    return new InvoiceEntity({
+      ...invoice,
+      invoiceItems: invoice.invoiceItems
+        ? invoice.invoiceItems.map((item: any) => new InvoiceItemEntity(item))
+        : [],
+      chatHistory: invoice.chatHistory
+        ? new ChatEntity({ ...invoice.chatHistory })
+        : undefined,
+    });
   }
 
   async deleteInvoice(id: string): Promise<void> {
@@ -170,8 +187,8 @@ export class InvoiceRepository {
     chatId: string,
     role: 'USER' | 'ASSISTANT',
     content: string,
-  ): Promise<void> {
-    await this.prisma.chatInteraction.create({
+  ): Promise<ChatInteractionEntity> {
+    return await this.prisma.chatInteraction.create({
       data: {
         chatId: chatId,
         role,

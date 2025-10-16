@@ -1,4 +1,3 @@
-import jwt from 'jsonwebtoken';
 import { Injectable } from '@nestjs/common';
 import { EnumTokenType } from 'generated/prisma';
 import { expiresInByType } from '../../infrastructure/utils/expires';
@@ -23,10 +22,7 @@ export class TokensService {
   }
 
   async saveToken(saveTokenDto: SaveTokenDto): Promise<TokensEntity> {
-    const token = await this.generateToken(
-      saveTokenDto.userId,
-      saveTokenDto.type,
-    );
+    const token = this.generateToken(saveTokenDto.userId, saveTokenDto.type);
 
     if (!token) {
       throw new Error('Failed to generate token');
@@ -37,7 +33,7 @@ export class TokensService {
     );
   }
 
-  async generateToken(userId: string, type: EnumTokenType): Promise<string> {
+  generateToken(userId: string, type: EnumTokenType): string {
     const tokenPayload = {
       sub: userId,
       iat: Date.now(),
@@ -59,11 +55,8 @@ export class TokensService {
       expiresIn: string;
     };
   }> {
-    const accessToken = await this.generateToken(userId, EnumTokenType.ACCESS);
-    const refreshToken = await this.generateToken(
-      userId,
-      EnumTokenType.REFRESH,
-    );
+    const accessToken = this.generateToken(userId, EnumTokenType.ACCESS);
+    const refreshToken = this.generateToken(userId, EnumTokenType.REFRESH);
 
     await this.saveToken({
       userId,

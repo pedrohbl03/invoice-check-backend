@@ -20,13 +20,14 @@ export class StorageService {
   async uploadFile(
     bucketName: string,
     key: string,
-    body: Express.Multer.File,
+    body: Buffer,
+    contentType: string,
   ): Promise<void> {
     const command = new PutObjectCommand({
       Bucket: bucketName,
       Key: key,
-      Body: body.buffer,
-      ContentType: body.mimetype,
+      Body: body,
+      ContentType: contentType,
     });
     await this.s3Client.send(command);
   }

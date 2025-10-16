@@ -15,3 +15,8 @@ export const getFileBase64 = (file: Buffer): string => {
 export const getFileUrl = (file: Buffer): string => {
   return `data:image/${getFileExtension(file)};base64,${getFileBase64(file)}`;
 };
+
+export const getFileNameByUrl = (url: string): string => {
+  const urlParts = url.split('/');
+  return urlParts[urlParts.length - 1];
+};

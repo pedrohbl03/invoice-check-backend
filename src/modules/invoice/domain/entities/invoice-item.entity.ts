@@ -1,14 +1,19 @@
+import { Exclude } from 'class-transformer';
 import { InvoiceItem } from 'generated/prisma';
-import { Decimal } from 'generated/prisma/runtime/library';
-
 export class InvoiceItemEntity implements InvoiceItem {
+  @Exclude()
   id: number;
+  @Exclude()
   invoiceId: string;
   itemName: string;
   itemQuantity: number;
-  itemPrice: Decimal;
-  itemTotal: Decimal;
+
+  itemPrice: number;
+  itemTotal: number;
+
+  @Exclude()
   createdAt: Date;
+  @Exclude()
   updatedAt: Date;
 
   constructor(partial: Partial<InvoiceItemEntity>) {

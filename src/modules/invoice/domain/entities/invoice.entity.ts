@@ -1,6 +1,5 @@
 import { Transform } from 'class-transformer';
 import { EnumInvoiceStatus, Invoice } from 'generated/prisma';
-import { Decimal } from 'generated/prisma/runtime/library';
 import { InvoiceItemEntity } from './invoice-item.entity';
 import { ChatEntity } from './invoice-chat.entity';
 
@@ -31,9 +30,9 @@ export class InvoiceEntity implements Invoice {
   })
   invoiceDate: Date | null;
 
-  invoiceAmount: Decimal | null;
-  invoiceDiscount: Decimal | null;
-  invoiceTax: Decimal | null;
+  invoiceAmount: number | null;
+  invoiceDiscount: number | null;
+  invoiceTax: number | null;
   invoiceStatus: EnumInvoiceStatus;
   invoiceUrl: string | null;
   fileOriginalName: string | null;

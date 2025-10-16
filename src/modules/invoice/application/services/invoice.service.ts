@@ -16,6 +16,7 @@ import {
 } from '../../invoice.error';
 import { StorageUploadError } from 'src/database/storage/storage.error';
 import { ChatEntity } from '../../domain/entities/invoice-chat.entity';
+import { PdfService } from './pdf.service';
 
 @Injectable()
 export class InvoiceService {
@@ -23,6 +24,7 @@ export class InvoiceService {
     private readonly invoiceRepository: InvoiceRepository,
     private readonly openaiService: OpenAIService,
     private readonly storageService: StorageService,
+    private readonly pdfService: PdfService,
   ) {}
 
   async createInvoice(
@@ -44,7 +46,12 @@ export class InvoiceService {
     );
 
     await this.storageService
-      .uploadFile(envConfig().r2.bucketName, invoiceKey, file)
+      .uploadFile(
+        envConfig().r2.bucketName,
+        invoiceKey,
+        file.buffer,
+        file.mimetype,
+      )
       .catch(async (error) => {
         await this.invoiceRepository.deleteInvoice(invoice.id);
         console.error(invoice.id, error);
@@ -74,6 +81,10 @@ export class InvoiceService {
 
   async findAllInvoices(): Promise<InvoiceEntity[]> {
     return await this.invoiceRepository.findAllInvoices();
+  }
+
+  async findInvoicesByUserId(userId: string): Promise<InvoiceEntity[]> {
+    return await this.invoiceRepository.findInvoicesByUserId(userId);
   }
 
   async findInvoiceById(id: string): Promise<InvoiceEntity | null> {
@@ -126,19 +137,20 @@ export class InvoiceService {
       message,
     );
 
-    const response = await this.openaiService.sendMessage(
+    const chatResponse = await this.openaiService.sendMessage(
       invoice,
       history,
       message,
     );
 
-    await this.invoiceRepository.createChatInteraction(
-      history.id,
-      'ASSISTANT',
-      response,
-    );
+    const registredResponse =
+      await this.invoiceRepository.createChatInteraction(
+        history.id,
+        'ASSISTANT',
+        chatResponse,
+      );
 
-    return response;
+    return registredResponse;
   }
 
   private async processInvoiceAsync(
@@ -166,5 +178,34 @@ export class InvoiceService {
     }
 
     return new InvoiceEntity(updatedInvoice);
+  }
+
+  async getCompilatedInvoicePdf(id: string): Promise<{ url: string }> {
+    const invoice = await this.invoiceRepository.findInvoiceById(id);
+
+    if (!invoice) {
+      throw new InvoiceNotFoundError();
+    }
+
+    if (invoice.invoiceStatus !== EnumInvoiceStatus.ANALYZED) {
+      throw new InvoiceValidationError(
+        'Invoice must be analyzed to generate PDF',
+      );
+    }
+
+    const pdfBuffer = await this.pdfService.generatePdfByInvoice(invoice);
+
+    await this.storageService.uploadFile(
+      envConfig().r2.bucketName,
+      generateInvoiceKey(invoice.userId, invoice.id, 'pdf'),
+      pdfBuffer,
+      'application/pdf',
+    );
+
+    const pdfUrl = formatCDNUrl(
+      generateInvoiceKey(invoice.userId, invoice.id, 'pdf'),
+    );
+
+    return { url: pdfUrl };
   }
 }

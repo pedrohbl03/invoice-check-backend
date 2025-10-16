@@ -12,6 +12,7 @@ import { CreateUserDto } from './application';
 import { UserEntity } from './domain';
 import { ApiBody, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { UpdateUserDto } from './application/dto/update-user.dto';
+import { UserResponseDto } from './application/dto/user-response.dto';
 
 @Controller('users')
 export class UserController {
@@ -26,7 +27,9 @@ export class UserController {
     description: 'The user to create',
     type: CreateUserDto,
   })
-  async createUser(@Body() createUserDto: CreateUserDto) {
+  async createUser(
+    @Body() createUserDto: CreateUserDto,
+  ): Promise<UserResponseDto> {
     return this.userService.createUser(createUserDto);
   }
 
@@ -38,7 +41,7 @@ export class UserController {
   async updateUser(
     @Param('id') id: string,
     @Body() updateUserDto: UpdateUserDto,
-  ) {
+  ): Promise<UserResponseDto> {
     return this.userService.updateUser(id, updateUserDto);
   }
 
@@ -47,7 +50,7 @@ export class UserController {
     type: UserEntity,
   })
   @Delete(':id')
-  async deleteUser(@Param('id') id: string) {
+  async deleteUser(@Param('id') id: string): Promise<void> {
     return this.userService.deleteUser(id);
   }
 
@@ -56,7 +59,7 @@ export class UserController {
     description: 'The user has been successfully found.',
     type: UserEntity,
   })
-  async getUser(@Param('id') id: string) {
+  async getUser(@Param('id') id: string): Promise<UserResponseDto> {
     return this.userService.findUserById(id);
   }
 
@@ -65,7 +68,7 @@ export class UserController {
     type: [UserEntity],
   })
   @Get()
-  async getUsers() {
+  async getUsers(): Promise<UserResponseDto[]> {
     return this.userService.findAllUsers();
   }
 }

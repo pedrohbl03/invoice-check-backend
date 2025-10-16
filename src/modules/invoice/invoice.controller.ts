@@ -43,6 +43,12 @@ export class InvoiceController {
   }
 
   @UseGuards(AuthGuard)
+  @Get('/user/:id')
+  findInvoicesByUserId(@Param('id') userId: string): Promise<InvoiceEntity[]> {
+    return this.invoiceService.findInvoicesByUserId(userId);
+  }
+
+  @UseGuards(AuthGuard)
   @Delete(':id')
   deleteInvoice(@Param('id') id: string): Promise<void> {
     return this.invoiceService.deleteInvoice(id);
@@ -61,5 +67,11 @@ export class InvoiceController {
     @Body('message') message: string,
   ): Promise<void> {
     return this.invoiceService.postChatMessage(id, message);
+  }
+
+  @UseGuards(AuthGuard)
+  @Get(':id/pdf')
+  async getInvoicePdf(@Param('id') id: string): Promise<{ url: string }> {
+    return await this.invoiceService.getCompilatedInvoicePdf(id);
   }
 }
