@@ -1,4 +1,4 @@
-import { Chat } from 'generated/prisma';
+import { Chat } from '../../../../../generated/prisma';
 import { ChatInteractionEntity } from './chat-interaction.entity';
 import { InvoiceEntity } from './invoice.entity';
 

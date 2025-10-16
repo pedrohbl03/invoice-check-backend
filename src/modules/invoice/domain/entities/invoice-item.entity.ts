@@ -1,5 +1,5 @@
 import { Exclude } from 'class-transformer';
-import { InvoiceItem } from 'generated/prisma';
+import { InvoiceItem } from '../../../../../generated/prisma';
 export class InvoiceItemEntity implements InvoiceItem {
   @Exclude()
   id: number;

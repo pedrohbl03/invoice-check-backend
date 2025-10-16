@@ -1,4 +1,4 @@
-import { PrismaService } from 'src/database';
+import { PrismaService } from '../../../../database';
 import { Injectable } from '@nestjs/common';
 import { TokensEntity } from '../../domain/entities/tokens.entity';
 import { EnumTokenType } from 'generated/prisma';

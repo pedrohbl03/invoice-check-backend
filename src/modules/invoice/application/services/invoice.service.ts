@@ -1,20 +1,23 @@
 import { Injectable } from '@nestjs/common';
-import { StorageService } from 'src/database/storage/storage.service';
+import { StorageService } from '../../../../database/storage/storage.service';
 import { InvoiceRepository } from '../../infrastructure/repositories/invoice.repository';
 import { InvoiceEntity } from '../../domain';
-import { envConfig } from 'src/config';
-import { EnumInvoiceStatus } from 'generated/prisma';
+import { envConfig } from '../../../../config';
+import { EnumInvoiceStatus } from '../../../../../generated/prisma';
 import {
   formatCDNUrl,
   generateInvoiceKey,
 } from '../../infrastructure/utils/formatCDNurl';
-import { InteractionNotFoundError, OpenAIService } from 'src/modules/openai';
+import {
+  InteractionNotFoundError,
+  OpenAIService,
+} from '../../../../modules/openai';
 import {
   InvoiceNotFoundError,
   InvoiceProcessingError,
   InvoiceValidationError,
 } from '../../invoice.error';
-import { StorageUploadError } from 'src/database/storage/storage.error';
+import { StorageUploadError } from '../../../../database/storage/storage.error';
 import { ChatEntity } from '../../domain/entities/invoice-chat.entity';
 import { PdfService } from './pdf.service';
 

@@ -1,5 +1,5 @@
 import { Exclude } from 'class-transformer';
-import { EnumRole } from 'generated/prisma';
+import { EnumRole } from '../../../../../generated/prisma';
 
 export interface UserProps {
   id: string;

@@ -6,7 +6,7 @@ import { UserAlreadyExistsError, UserService } from '../../../user';
 import { passwordCompare } from '../../infrastructure/utils/passwordCompare';
 import { LoginDto } from '../dto/login.dto';
 import { RegisterDto } from '../dto/register.dto';
-import { EnumRole } from 'generated/prisma';
+import { EnumRole } from '../../../../../generated/prisma';
 import { TokensService } from './tokens.service';
 
 @Injectable()

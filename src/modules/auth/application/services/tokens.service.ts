@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { EnumTokenType } from 'generated/prisma';
+import { EnumTokenType } from '../../../../../generated/prisma';
 import { expiresInByType } from '../../infrastructure/utils/expires';
 import { TokensEntity } from '../../domain/entities/tokens.entity';
 import { TokensRepository } from '../../infrastructure/repositories/tokens.repository';

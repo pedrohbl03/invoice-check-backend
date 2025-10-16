@@ -5,14 +5,15 @@ import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 @Injectable()
 export class StorageService {
   private s3Client: S3Client;
+  private config = envConfig();
 
   constructor() {
     this.s3Client = new S3Client({
       region: 'auto',
-      endpoint: envConfig().r2.endpoint,
+      endpoint: this.config.r2.endpoint,
       credentials: {
-        accessKeyId: envConfig().r2.accessKeyId,
-        secretAccessKey: envConfig().r2.secretAccessKey,
+        accessKeyId: this.config.r2.accessKeyId,
+        secretAccessKey: this.config.r2.secretAccessKey,
       },
     });
   }
