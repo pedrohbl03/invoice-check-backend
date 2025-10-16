@@ -1,4 +1,4 @@
-import { PrismaService } from 'src/database';
+import { PrismaService } from '@/database';
 import { InvoiceEntity } from '../../domain';
 import { Injectable } from '@nestjs/common';
 import { ChatEntity } from '../../domain/entities/invoice-chat.entity';

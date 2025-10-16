@@ -5,7 +5,7 @@ import { UserModule } from '../user';
 import { TokensService } from './application/services/tokens.service';
 import { TokensRepository } from './infrastructure/repositories/tokens.repository';
 import { JwtModule } from '@nestjs/jwt';
-import { envConfig } from 'src/config';
+import { envConfig } from '@/config';
 
 @Module({
   imports: [

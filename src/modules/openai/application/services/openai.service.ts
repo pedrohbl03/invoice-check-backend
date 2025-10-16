@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import OpenAI from 'openai';
-import { InvoiceEntity } from 'src/modules/invoice/domain';
+import { InvoiceEntity } from '@/modules/invoice/domain';
 import { INSTRUCTIONS } from '../../infrastructure/constants/instructions.constants';
-import { ChatInteractionEntity } from 'src/modules/invoice/domain/entities/chat-interaction.entity';
-import { ChatEntity } from 'src/modules/invoice/domain/entities/invoice-chat.entity';
+import { ChatInteractionEntity } from '@/modules/invoice/domain/entities/chat-interaction.entity';
+import { ChatEntity } from '@/modules/invoice/domain/entities/invoice-chat.entity';
 
 @Injectable()
 export class OpenAIService {
